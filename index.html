@@ -31,11 +31,7 @@ body{height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
   gap:8px;
 }
 #topbar h1{font-size:15px;font-weight:700;letter-spacing:-0.2px;}
-#keyBtn{
-  font-size:11px;color:var(--muted);background:var(--panel2);
-  border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;
-}
-#keyBtn.set{color:var(--accent2);}
+#freeTag{font-size:10.5px;color:var(--accent2);background:rgba(61,220,151,0.1);border:1px solid rgba(61,220,151,0.3);border-radius:7px;padding:5px 9px;font-weight:700;}
 
 #scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 #scroll-inner{padding:14px;display:flex;flex-direction:column;gap:14px;padding-bottom:30px;}
@@ -111,11 +107,14 @@ button:disabled{opacity:0.35;cursor:not-allowed;}
 }
 .sceneRow .thumb{width:30px;height:30px;border-radius:6px;object-fit:cover;flex-shrink:0;background:#000;}
 .sceneRow .info{flex:1;min-width:0;}
-.sceneRow .cap{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sceneRow .cap{
+  font-size:13px;font-weight:600;border:none;background:transparent;color:var(--text);
+  width:100%;outline:none;font-family:inherit;
+}
 .sceneRow .meta{font-size:10.5px;color:var(--muted);}
-.sceneRow .delBtn{
-  width:26px;height:26px;border-radius:7px;background:rgba(255,93,93,0.12);
-  color:var(--warn);font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+.sceneRow select{
+  font-size:11px;background:var(--panel);color:var(--text);border:1px solid var(--line);
+  border-radius:6px;padding:3px 4px;flex-shrink:0;max-width:62px;
 }
 
 #status{font-size:12px;color:var(--accent2);font-weight:600;text-align:center;min-height:16px;}
@@ -129,21 +128,18 @@ button:disabled{opacity:0.35;cursor:not-allowed;}
 @keyframes sp{to{transform:rotate(360deg);}}
 #overlayTxt{font-size:13px;color:var(--text);font-weight:600;}
 
-#keyModal{
+#canvaModal{
   position:fixed;inset:0;background:rgba(8,8,14,0.92);
   display:none;align-items:center;justify-content:center;z-index:60;padding:20px;
 }
-#keyModal .box{
+#canvaModal .box{
   background:var(--panel);border:1px solid var(--line);border-radius:14px;
-  padding:18px;width:100%;max-width:360px;
+  padding:18px;width:100%;max-width:380px;max-height:80vh;overflow-y:auto;
 }
-#keyModal h3{font-size:14px;margin-bottom:10px;}
-#keyModal p{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;}
-#keyInput{
-  width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;
-  padding:9px 10px;color:var(--text);font-size:13px;margin-bottom:10px;outline:none;font-family:monospace;
-}
-#keyInput:focus{border-color:var(--accent);}
+#canvaModal h3{font-size:15px;margin-bottom:12px;}
+#canvaModal ol{padding-left:20px;font-size:13px;line-height:1.7;color:var(--text);}
+#canvaModal ol li{margin-bottom:8px;}
+#canvaModal .note{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.5;background:var(--panel2);padding:10px;border-radius:8px;}
 
 ::-webkit-scrollbar{display:none;}
 </style>
@@ -152,7 +148,7 @@ button:disabled{opacity:0.35;cursor:not-allowed;}
 
 <div id="topbar">
   <h1>🎬 Explainer Video Maker</h1>
-  <button id="keyBtn" onclick="openKeyModal()">Set API Key</button>
+  <span id="freeTag">100% Free</span>
 </div>
 
 <div id="scroll"><div id="scroll-inner">
@@ -160,6 +156,7 @@ button:disabled{opacity:0.35;cursor:not-allowed;}
   <div class="card">
     <h2>1 · Script</h2>
     <textarea id="scriptInput" placeholder="Paste or type your script…"></textarea>
+    <div class="hint">Your script gets split automatically into short captions, one per scene, in order.</div>
   </div>
 
   <div class="card">
@@ -167,7 +164,7 @@ button:disabled{opacity:0.35;cursor:not-allowed;}
     <div class="uploadRow" id="charRow">
       <label class="uploadBox add"><input type="file" accept="image/*" multiple onchange="addImages(event,'char')">+</label>
     </div>
-    <div class="hint">Upload a few images of your constant character — happy, sad, climbing, running, etc. The AI will match one to each scene's mood.</div>
+    <div class="hint">Upload a few images of your constant character — happy, sad, climbing, running, etc. You'll pick which one fits each scene.</div>
   </div>
 
   <div class="card">
@@ -180,19 +177,19 @@ button:disabled{opacity:0.35;cursor:not-allowed;}
 
   <div class="card">
     <h2>4 · Generate</h2>
-    <button class="btn-primary" id="genBtn" onclick="generateScenes()" style="width:100%">✨ Generate Scenes</button>
+    <button class="btn-primary" id="genBtn" onclick="generateScenes()" style="width:100%">✨ Build Scenes</button>
     <div id="status" style="margin-top:10px;">Add a script and your images to begin.</div>
   </div>
 
   <div class="card" id="sceneCard" style="display:none">
-    <h2>Scenes</h2>
+    <h2>Scenes — edit captions or swap character pose</h2>
     <div id="sceneList"></div>
   </div>
 
   <div class="card" id="stageCard" style="display:none">
     <div id="stageWrap">
       <canvas id="stage"></canvas>
-      <div id="stageEmpty">Generate scenes to preview</div>
+      <div id="stageEmpty">Build scenes to preview</div>
     </div>
   </div>
 
@@ -200,6 +197,9 @@ button:disabled{opacity:0.35;cursor:not-allowed;}
     <div class="btnRow">
       <button class="btn-primary" id="playBtn" onclick="playVideo()" disabled>▶ Play</button>
       <button class="btn-success" id="saveBtn" onclick="downloadVideo()" disabled>⬇ Save Video</button>
+    </div>
+    <div class="btnRow">
+      <button class="btn-ghost" onclick="openCanvaModal()" style="flex:1">🎨 Edit in Canva — how to</button>
     </div>
     <div class="btnRow">
       <button class="btn-ghost" id="resetBtn" onclick="resetAll()" style="flex:1">↺ Reset Everything</button>
@@ -213,17 +213,26 @@ button:disabled{opacity:0.35;cursor:not-allowed;}
   <div id="overlayTxt">Working…</div>
 </div>
 
-<div id="keyModal">
+<div id="canvaModal">
   <div class="box">
-    <h3>Anthropic API Key</h3>
-    <p>Stored only in this browser (localStorage), never uploaded anywhere else. Needed to generate scenes from your script.</p>
-    <input id="keyInput" type="password" placeholder="sk-ant-..." autocomplete="off" autocapitalize="off" spellcheck="false">
-    <div class="btnRow">
-      <button class="btn-ghost" onclick="closeKeyModal()" style="flex:1">Cancel</button>
-      <button class="btn-primary" onclick="saveKey()" style="flex:1">Save</button>
-    </div>
-    <div class="btnRow">
-      <button class="btn-danger" onclick="clearKey()" style="width:100%">Clear saved key</button>
+    <h3>🎨 Bring this video into Canva</h3>
+    <ol>
+      <li>Tap <strong>Save Video</strong> in the app first — this downloads a <code>.webm</code> file to your phone.</li>
+      <li>If Canva has trouble opening <code>.webm</code> on your device, save the video to your phone's gallery first — most phones auto-convert it to <code>.mp4</code> when you do this, which Canva always accepts.</li>
+      <li>Open the Canva app → <strong>Create a design</strong> → pick any video template or a blank video.</li>
+      <li>Tap <strong>Uploads</strong> → <strong>Upload media</strong> → select your saved video file.</li>
+      <li>Drag it onto your timeline at the bottom of the screen.</li>
+    </ol>
+    <p style="font-size:13px;margin-top:10px;">Once it's on Canva's timeline, you have full control:</p>
+    <ol>
+      <li>Split it into pieces (tap the clip → <strong>Split</strong>) to edit individual scenes.</li>
+      <li>Trim the start/end of any piece by dragging its edges.</li>
+      <li>Add your own text, stickers, music, or transitions on top.</li>
+      <li>Reorder pieces by dragging them on the timeline.</li>
+    </ol>
+    <div class="note">Canva won't know which clip was "scene 3" from your script — it just sees plain video. If you want to edit scenes separately from the start, generate and save shorter clips scene-by-scene instead of the full video, then arrange them yourself in Canva.</div>
+    <div class="btnRow" style="margin-top:14px;">
+      <button class="btn-primary" onclick="closeCanvaModal()" style="width:100%">Got it</button>
     </div>
   </div>
 </div>
@@ -247,31 +256,10 @@ const ctx = canvas.getContext('2d');
 canvas.width = CW; canvas.height = CH;
 
 /* ============================================================
-   API KEY HANDLING
+   CANVA MODAL
    ============================================================ */
-function getKey(){ return localStorage.getItem('anthropic_api_key') || ''; }
-function openKeyModal(){
-  document.getElementById('keyInput').value = getKey();
-  document.getElementById('keyModal').style.display = 'flex';
-}
-function closeKeyModal(){ document.getElementById('keyModal').style.display = 'none'; }
-function saveKey(){
-  const v = document.getElementById('keyInput').value.trim();
-  if(v) localStorage.setItem('anthropic_api_key', v);
-  refreshKeyBtn();
-  closeKeyModal();
-}
-function clearKey(){
-  localStorage.removeItem('anthropic_api_key');
-  document.getElementById('keyInput').value = '';
-  refreshKeyBtn();
-}
-function refreshKeyBtn(){
-  const btn = document.getElementById('keyBtn');
-  if(getKey()){ btn.textContent = '🔑 Key Set'; btn.classList.add('set'); }
-  else { btn.textContent = 'Set API Key'; btn.classList.remove('set'); }
-}
-refreshKeyBtn();
+function openCanvaModal(){ document.getElementById('canvaModal').style.display = 'flex'; }
+function closeCanvaModal(){ document.getElementById('canvaModal').style.display = 'none'; }
 
 /* ============================================================
    IMAGE UPLOAD
@@ -334,72 +322,75 @@ function updateStatus(){
   if(!script){ s.textContent = 'Add a script to begin.'; genBtn.disabled = true; return; }
   if(charImages.length === 0){ s.textContent = 'Add at least one character image.'; genBtn.disabled = true; return; }
   if(explImages.length === 0){ s.textContent = 'Add at least one explainer image — this sets your scene count.'; genBtn.disabled = true; return; }
-  s.textContent = `Ready — will generate ${explImages.length} scene${explImages.length>1?'s':''}.`;
+  s.textContent = `Ready — will build ${explImages.length} scene${explImages.length>1?'s':''}.`;
   genBtn.disabled = false;
 }
 document.getElementById('scriptInput').addEventListener('input', updateStatus);
 
 /* ============================================================
-   SCENE GENERATION (Claude API)
-   ============================================================ */
-async function generateScenes(){
-  const key = getKey();
-  if(!key){ openKeyModal(); return; }
+   FREE LOCAL SCENE BUILDING (no AI, no API, no cost)
+   ============================================================
+   Splits the script into N roughly-even chunks (N = number of
+   explainer images), then trims each chunk down to a short
+   2-6 word caption by keeping the most "contentful" words
+   (skipping common filler words) from that chunk.
+   Character pose defaults to cycling through uploaded images;
+   you can override any scene's pose manually afterward.
+*/
+const FILLER_WORDS = new Set(['a','an','the','is','are','was','were','be','been','being','to','of','in','on','at','for','and','or','but','so','it','its',
+  'this','that','these','those','with','as','by','from','than','then','than','i','you','we','they','he','she','his','her','their','our','your',
+  'do','does','did','have','has','had','will','would','can','could','should','just','very','really','also','not','no']);
+
+function splitScriptIntoChunks(script, n){
+  // Split into sentences first, then distribute sentences across n buckets,
+  // falling back to splitting by words if there are fewer sentences than n.
+  const sentences = script.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
+  if(sentences.length >= n){
+    // group sentences evenly into n buckets
+    const buckets = Array.from({length:n}, () => []);
+    sentences.forEach((s, i) => buckets[i % n].push(s));
+    // reorder so buckets stay roughly in original order
+    const perBucket = Math.ceil(sentences.length / n);
+    const ordered = Array.from({length:n}, () => []);
+    sentences.forEach((s, i) => {
+      const b = Math.min(n-1, Math.floor(i / perBucket));
+      ordered[b].push(s);
+    });
+    return ordered.map(b => b.join(' '));
+  }
+  // fewer sentences than scenes: split by words instead
+  const words = script.split(/\s+/).filter(Boolean);
+  const perChunk = Math.ceil(words.length / n);
+  const chunks = [];
+  for(let i=0;i<n;i++){
+    chunks.push(words.slice(i*perChunk, (i+1)*perChunk).join(' '));
+  }
+  return chunks;
+}
+
+function chunkToCaption(chunk){
+  const words = chunk.replace(/[.,!?;:"']/g,'').split(/\s+/).filter(Boolean);
+  const meaningful = words.filter(w => !FILLER_WORDS.has(w.toLowerCase()));
+  const pool = meaningful.length >= 2 ? meaningful : words;
+  const picked = pool.slice(0, 5);
+  if(picked.length === 0) return chunk.slice(0, 24);
+  return picked.join(' ');
+}
+
+function generateScenes(){
   const script = document.getElementById('scriptInput').value.trim();
   if(!script || explImages.length === 0 || charImages.length === 0) return;
 
   const n = explImages.length;
-  showOverlay('Writing scenes…');
+  showOverlay('Building scenes…');
   document.getElementById('genBtn').disabled = true;
 
-  try {
-    const charDescs = charImages.map((_, i) => `Character image #${i}`).join(', ');
-    const prompt = `You are storyboarding a short explainer video from this script:
-
-"${script}"
-
-There are exactly ${n} scenes, no more, no less — one per explainer image already chosen by the user. There are ${charImages.length} character pose images available, indexed 0 to ${charImages.length-1} (you cannot see them, but assume they cover a range of moods/actions like neutral, happy, sad, thinking, climbing, celebrating, etc. — pick whichever index best fits the emotional beat of each scene, varying them naturally across the story arc).
-
-Return ONLY a JSON array of exactly ${n} objects, no markdown, no commentary:
-[{"caption": "2-5 word phrase from the script", "charIndex": 0}, ...]
-
-Rules:
-- "caption" must be 2-5 words, punchy, directly drawn from or inspired by the script, in story order
-- "charIndex" must be an integer between 0 and ${charImages.length-1}
-- Scene 1 should introduce the idea, the last scene should land the conclusion
-- Vary charIndex sensibly with the emotional arc of the script
-
-Return only the JSON array.`;
-
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
-    if(!res.ok){
-      const errText = await res.text();
-      throw new Error(`API error ${res.status}: ${errText.slice(0,200)}`);
-    }
-
-    const data = await res.json();
-    const text = data.content.map(c => c.text || '').join('');
-    const match = text.match(/\[[\s\S]*\]/);
-    if(!match) throw new Error('Could not find JSON in response');
-    const parsed = JSON.parse(match[0]);
-
-    scenes = parsed.slice(0, n).map((s, i) => ({
-      caption: (s.caption || '').trim(),
-      charIndex: Math.max(0, Math.min(charImages.length-1, Number.isInteger(s.charIndex) ? s.charIndex : 0)),
+  // tiny delay just so the overlay is visible / feels responsive
+  setTimeout(() => {
+    const chunks = splitScriptIntoChunks(script, n);
+    scenes = chunks.map((chunk, i) => ({
+      caption: chunkToCaption(chunk),
+      charIndex: i % charImages.length,
       explIndex: i
     }));
 
@@ -414,66 +405,8 @@ Return only the JSON array.`;
     document.getElementById('playBtn').disabled = false;
     document.getElementById('saveBtn').disabled = false;
     drawStillFrame(0);
-    setStatusLine(`✅ ${scenes.length} scenes ready — press Play`);
-
-  } catch(err){
-    hideOverlay();
-    document.getElementById('genBtn').disabled = false;
-    setStatusLine('❌ ' + err.message);
-    console.error(err);
-  }
-}
-
-async function regenerateScene(idx){
-  const key = getKey();
-  if(!key){ openKeyModal(); return; }
-  const script = document.getElementById('scriptInput').value.trim();
-  showOverlay(`Rewriting scene ${idx+1}…`);
-  try {
-    const prompt = `Script: "${script}"
-
-This is scene ${idx+1} of ${scenes.length} in a storyboard. Give me ONE replacement scene as JSON only, no markdown:
-{"caption": "2-5 word phrase from the script", "charIndex": 0}
-
-charIndex must be an integer 0 to ${charImages.length-1} (pick whichever pose/mood fits this moment in the story).
-Make it different from a generic/neutral choice — be specific to this moment in the script.
-Return only the JSON object.`;
-
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 300,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    if(!res.ok) throw new Error(`API error ${res.status}`);
-    const data = await res.json();
-    const text = data.content.map(c => c.text || '').join('');
-    const match = text.match(/\{[\s\S]*\}/);
-    if(!match) throw new Error('Could not parse response');
-    const s = JSON.parse(match[0]);
-    scenes[idx].caption = (s.caption || scenes[idx].caption).trim();
-    scenes[idx].charIndex = Math.max(0, Math.min(charImages.length-1, Number.isInteger(s.charIndex) ? s.charIndex : scenes[idx].charIndex));
-    hideOverlay();
-    renderSceneList();
-    drawStillFrame(idx);
-    setStatusLine(`✅ Scene ${idx+1} regenerated`);
-  } catch(err){
-    hideOverlay();
-    setStatusLine('❌ ' + err.message);
-  }
-}
-
-function deleteScene(idx){
-  if(!confirm(`Delete scene ${idx+1} and regenerate it?`)) return;
-  regenerateScene(idx);
+    setStatusLine(`✅ ${scenes.length} scenes built — edit captions below if needed, then press Play`);
+  }, 250);
 }
 
 function renderSceneList(){
@@ -482,33 +415,38 @@ function renderSceneList(){
   scenes.forEach((sc, i) => {
     const row = document.createElement('div');
     row.className = 'sceneRow';
-    const charThumb = charImages[sc.charIndex] ? charImages[sc.charIndex].dataUrl : '';
     const explThumb = explImages[sc.explIndex] ? explImages[sc.explIndex].dataUrl : '';
+
+    const charOptions = charImages.map((_, ci) => `<option value="${ci}" ${ci===sc.charIndex?'selected':''}>Pose ${ci+1}</option>`).join('');
+
     row.innerHTML = `
       <div class="num">${i+1}</div>
-      <img class="thumb" src="${charThumb}">
       <img class="thumb" src="${explThumb}">
       <div class="info">
-        <div class="cap">${escapeHtml(sc.caption)}</div>
-        <div class="meta">char #${sc.charIndex+1} · image #${sc.explIndex+1}</div>
+        <input class="cap" value="${escapeAttr(sc.caption)}">
+        <div class="meta">image #${sc.explIndex+1}</div>
       </div>
-      <div class="delBtn">↺</div>
+      <select class="charSel">${charOptions}</select>
     `;
-    row.querySelector('.delBtn').onclick = () => deleteScene(i);
-    row.onclick = (e) => { if(e.target.closest('.delBtn')) return; drawStillFrame(i); };
+    row.querySelector('.cap').addEventListener('input', (e) => {
+      scenes[i].caption = e.target.value;
+    });
+    row.querySelector('.charSel').addEventListener('change', (e) => {
+      scenes[i].charIndex = parseInt(e.target.value, 10);
+      drawStillFrame(i);
+    });
+    row.onclick = (e) => { if(e.target.closest('.cap') || e.target.closest('select')) return; drawStillFrame(i); };
     list.appendChild(row);
   });
 }
 
-function escapeHtml(s){
-  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+function escapeAttr(s){
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML.replace(/"/g,'&quot;');
 }
 
 /* ============================================================
    SKETCH EDGE EXTRACTION (for explainer images)
    ============================================================ */
-// Downscales the image, runs a simple Sobel edge filter, then walks
-// the edge map into short connected strokes that can be drawn in sequence.
 function buildSketchStrokes(image){
   const W = 160, H = Math.round(160 * image.height / image.width);
   const off = document.createElement('canvas');
@@ -517,14 +455,12 @@ function buildSketchStrokes(image){
   octx.drawImage(image, 0, 0, W, H);
   const data = octx.getImageData(0, 0, W, H).data;
 
-  // grayscale
   const gray = new Float32Array(W*H);
   for(let i=0;i<W*H;i++){
     const r=data[i*4], g=data[i*4+1], b=data[i*4+2];
     gray[i] = 0.299*r + 0.587*g + 0.114*b;
   }
 
-  // sobel
   const edge = new Uint8Array(W*H);
   const gx = [-1,0,1,-2,0,2,-1,0,1], gy = [-1,-2,-1,0,0,0,1,2,1];
   for(let y=1;y<H-1;y++){
@@ -539,14 +475,12 @@ function buildSketchStrokes(image){
     }
   }
 
-  // walk edge pixels into short strokes (greedy nearest-neighbor chains)
   const visited = new Uint8Array(W*H);
   const strokes = [];
   for(let y=0;y<H;y++){
     for(let x=0;x<W;x++){
       const idx = y*W+x;
       if(!edge[idx] || visited[idx]) continue;
-      // walk a chain from here
       let cx=x, cy=y;
       const pts = [[cx,cy]];
       visited[idx]=1;
@@ -599,7 +533,6 @@ function drawCaption(text, charCount){
   ctx.font = 'bold 52px -apple-system, Arial, sans-serif';
   ctx.fillStyle = '#16213e';
   ctx.textBaseline = 'top';
-  // wrap to fit width
   const maxW = CW - 60;
   const words = shown.split(' ');
   let line = '', y = CAPTION_Y;
@@ -622,8 +555,6 @@ function drawCharacter(entry, box){
   ctx.drawImage(img, x, y, w, h);
 }
 
-// Draws the explainer image build up progressively as sketch strokes,
-// then crossfades to the full color image once strokeProgress >= 1.
 function drawExplainerSketch(entry, explIndex, box, strokeProgress, colorFade){
   if(!entry) return;
   const { strokes, w, h } = getSketchData(explIndex);
@@ -770,7 +701,7 @@ async function downloadVideo(){
     const a = document.createElement('a');
     a.href = url; a.download = 'explainer-video.webm'; a.click();
     URL.revokeObjectURL(url);
-    setStatusLine('✅ Saved!');
+    setStatusLine('✅ Saved! Tap "Edit in Canva" below for next steps.');
     document.getElementById('saveBtn').disabled = false;
     document.getElementById('playBtn').disabled = false;
   };
