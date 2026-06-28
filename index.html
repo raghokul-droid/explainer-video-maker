@@ -146,12 +146,6 @@ button:disabled{opacity:0.35;cursor:not-allowed;}
 <div id="scroll"><div id="scroll-inner">
 
   <div class="card">
-    <h2>Script (for caption suggestions)</h2>
-    <textarea id="scriptInput" placeholder="Paste or type your full script…"></textarea>
-    <div class="hint">Each time you add a scene, the next unused chunk of this script is suggested as the caption — edit it freely before adding.</div>
-  </div>
-
-  <div class="card">
     <span class="badge">Building Scene <span id="sceneNumLabel">1</span></span>
     <h2>Character image (1 for this scene)</h2>
     <div class="uploadRow" id="charRow">
@@ -165,15 +159,7 @@ button:disabled{opacity:0.35;cursor:not-allowed;}
     <div class="uploadRow" id="explRow">
       <label class="uploadBox add"><input type="file" accept="image/*" multiple onchange="addExplImages(event)">+</label>
     </div>
-    <div class="hint">Upload up to 6. They'll auto-arrange in a grid and sketch-draw in one at a time during playback.</div>
-  </div>
-
-  <div class="card">
-    <h2>Caption for this scene</h2>
-    <input class="capField" id="captionInput" placeholder="Suggested caption appears here…">
-    <div class="btnRow">
-      <button class="btn-ghost btn-small" onclick="suggestCaption()">🔄 Suggest from script</button>
-    </div>
+    <div class="hint">Upload up to 6. They'll auto-arrange in a grid and sketch-draw in one at a time during playback. Add your own captions later in Canva — the top-left area is left blank for that.</div>
   </div>
 
   <div class="card">
@@ -252,18 +238,17 @@ canvas.width = CW; canvas.height = CH;
    Bottom caption band reserved first, then remaining height
    split 40% left (character) / 60% right (explainer grid).
 */
-const CAPTION_FONT_SIZE = 80;
-const CAPTION_GAP_ABOVE = 26;
-const CAPTION_BAND_H = 200;
-const CAPTION_PAD_X = 40;
+// Top-left strip is left blank — reserved for the person to add their own
+// text/caption later in Canva. The app draws nothing there.
+const TEXT_ZONE_H = 180;
+const LEFT_W = Math.round(CW*0.4);
+const RIGHT_W = CW - LEFT_W;
 
-const CONTENT_H = CH - CAPTION_BAND_H - CAPTION_GAP_ABOVE;
-const LEFT_ZONE = { x: 0, y: 0, w: Math.round(CW*0.4), h: CONTENT_H };
-const RIGHT_ZONE = { x: Math.round(CW*0.4), y: 0, w: CW - Math.round(CW*0.4), h: CONTENT_H };
+const TEXT_ZONE = { x: 0, y: 0, w: LEFT_W, h: TEXT_ZONE_H };
+const LEFT_ZONE = { x: 0, y: TEXT_ZONE_H, w: LEFT_W, h: CH - TEXT_ZONE_H };
+const RIGHT_ZONE = { x: LEFT_W, y: 0, w: RIGHT_W, h: CH };
 const ZONE_PAD = 24;
 const GRID_GUTTER = 18;
-
-const CAPTION_BAND_Y = CONTENT_H + CAPTION_GAP_ABOVE;
 
 /* ============================================================
    STATE
@@ -271,7 +256,6 @@ const CAPTION_BAND_Y = CONTENT_H + CAPTION_GAP_ABOVE;
 let scenes = [];
 let draftChar = null;
 let draftExpl = [];
-let scriptCursor = 0;
 let isPlaying = false;
 let rafId = null;
 let mediaRecorder = null;
@@ -360,35 +344,6 @@ function renderExplRow(){
 }
 
 /* ============================================================
-   CAPTION SUGGESTION (free, local script splitting)
-   ============================================================ */
-const FILLER_WORDS = new Set(['a','an','the','is','are','was','were','be','been','being','to','of','in','on','at','for','and','or','but','so','it','its',
-  'this','that','these','those','with','as','by','from','than','then','i','you','we','they','he','she','his','her','their','our','your',
-  'do','does','did','have','has','had','will','would','can','could','should','just','very','really','also','not','no']);
-
-function nextScriptChunk(){
-  const script = document.getElementById('scriptInput').value.trim();
-  if(!script) return '';
-  const sentences = script.split(/(?<=[.!?])\s+/).map(s=>s.trim()).filter(Boolean);
-  if(!sentences.length) return '';
-  if(scriptCursor >= sentences.length) return sentences[sentences.length-1];
-  return sentences[scriptCursor];
-}
-
-function chunkToCaption(chunk){
-  const words = chunk.replace(/[.,!?;:"']/g,'').split(/\s+/).filter(Boolean);
-  const meaningful = words.filter(w => !FILLER_WORDS.has(w.toLowerCase()));
-  const pool = meaningful.length >= 2 ? meaningful : words;
-  const picked = pool.slice(0, 5);
-  return picked.length ? picked.join(' ') : chunk.slice(0, 24);
-}
-
-function suggestCaption(){
-  const chunk = nextScriptChunk();
-  document.getElementById('captionInput').value = chunkToCaption(chunk);
-}
-
-/* ============================================================
    STATUS
    ============================================================ */
 function updateStatus(){
@@ -405,25 +360,16 @@ function updateStatus(){
    ============================================================ */
 function addScene(){
   if(!draftChar || draftExpl.length === 0) return;
-  let caption = document.getElementById('captionInput').value.trim();
-  if(!caption){
-    const chunk = nextScriptChunk();
-    caption = chunkToCaption(chunk) || `Scene ${scenes.length+1}`;
-  }
   scenes.push({
-    caption,
     charImg: draftChar,
     explImgs: draftExpl.slice(),
     sketchCache: null
   });
-  scriptCursor++;
 
   draftChar = null;
   draftExpl = [];
   renderCharRow();
   renderExplRow();
-  document.getElementById('captionInput').value = '';
-  suggestCaption();
 
   document.getElementById('sceneNumLabel').textContent = scenes.length + 1;
   renderSceneList();
@@ -467,7 +413,7 @@ function renderSceneList(){
       <img class="thumb" src="${sc.charImg.dataUrl}">
       <div class="thumbs">${thumbs}</div>
       <div class="info">
-        <div class="cap">${escapeHtml(sc.caption)}</div>
+        <div class="cap">Scene ${i+1}</div>
         <div class="meta">${sc.explImgs.length} explainer image${sc.explImgs.length>1?'s':''}</div>
       </div>
       <div class="delBtn">✕</div>
@@ -545,7 +491,7 @@ function buildSketchStrokes(image){
       for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){
         const v = gray[(y+dy)*W+(x+dx)]; sx+=v*gx[k]; sy+=v*gy[k]; k++;
       }
-      edge[y*W+x] = Math.sqrt(sx*sx+sy*sy) > 90 ? 1 : 0;
+      edge[y*W+x] = Math.sqrt(sx*sx+sy*sy) > 120 ? 1 : 0;
     }
   }
   const visited = new Uint8Array(W*H);
@@ -589,27 +535,6 @@ function getSketchData(scene, explIdx){
    ============================================================ */
 function drawBG(){ ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,CW,CH); }
 
-function drawCaptionBand(text, charCount){
-  if(!text) return;
-  const shown = text.substring(0, charCount);
-  ctx.font = `bold ${CAPTION_FONT_SIZE}px -apple-system, Arial, sans-serif`;
-  ctx.fillStyle = '#16213e';
-  ctx.textBaseline = 'top';
-  const maxW = CW - CAPTION_PAD_X*2;
-  const words = shown.split(' ');
-  let line = '', lines = [];
-  for(const w of words){
-    const test = line ? line+' '+w : w;
-    if(ctx.measureText(test).width > maxW && line){ lines.push(line); line = w; }
-    else line = test;
-  }
-  if(line) lines.push(line);
-  const lineH = CAPTION_FONT_SIZE * 1.15;
-  const totalH = lines.length * lineH;
-  const startY = CAPTION_BAND_Y + Math.max(0, (CAPTION_BAND_H - totalH)/2);
-  lines.slice(0,2).forEach((l,i) => ctx.fillText(l, CAPTION_PAD_X, startY + i*lineH));
-}
-
 function drawCharacter(entry){
   if(!entry) return;
   const r = fitInCell(entry.img, LEFT_ZONE, ZONE_PAD);
@@ -625,7 +550,7 @@ function drawExplainerCell(entry, sketchData, cell, progress){
   ctx.translate(r.x, r.y);
   ctx.scale(scale, scale);
   ctx.strokeStyle = '#16213e';
-  ctx.lineWidth = 1.6 / scale;
+  ctx.lineWidth = 3 / scale;
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
   const topPts = top.reduce((a,s)=>a+s.pts.length,0);
@@ -693,7 +618,7 @@ function drawHand(x, y, angle){
 /* ============================================================
    FRAME RENDERING
    ============================================================ */
-function renderFrame(sceneIdx, charCount, slideX, activeExplIdx, perImageProgress){
+function renderFrame(sceneIdx, slideX, activeExplIdx, perImageProgress){
   drawBG();
   if(!scenes.length) return;
   const sc = scenes[sceneIdx];
@@ -701,7 +626,6 @@ function renderFrame(sceneIdx, charCount, slideX, activeExplIdx, perImageProgres
   ctx.save();
   ctx.translate(slideX, 0);
 
-  drawCaptionBand(sc.caption, charCount);
   drawCharacter(sc.charImg);
 
   const cells = gridCells(sc.explImgs.length, RIGHT_ZONE.x+ZONE_PAD, RIGHT_ZONE.y+ZONE_PAD,
@@ -725,7 +649,7 @@ function renderFrame(sceneIdx, charCount, slideX, activeExplIdx, perImageProgres
 
 function drawStillFrame(idx){
   const sc = scenes[idx];
-  renderFrame(idx, sc.caption.length, 0, sc.explImgs.length, 1);
+  renderFrame(idx, 0, sc.explImgs.length, 1);
 }
 
 /* ============================================================
@@ -746,36 +670,31 @@ function playVideo(){
 }
 
 function runAnimation(onComplete){
-  let si=0, charCount=0, slideX=-CW, phase='slide_in', timer=0, last=null, activeExplIdx=0;
-  const SLIDE_SPEED=20, CHAR_SPEED=45, SKETCH_MS_PER_IMG=900, HOLD_MS=1200;
+  let si=0, slideX=-CW, phase='slide_in', timer=0, last=null, activeExplIdx=0;
+  const SLIDE_SPEED=20, SKETCH_MS_PER_IMG=3000, HOLD_MS=1200;
 
   function frame(ts){
     if(!isPlaying) return;
     const dt = last ? Math.min(ts-last,50) : 16; last = ts;
     const sc = scenes[si];
-    const total = sc.caption.length;
     const nImgs = sc.explImgs.length;
 
     if(phase === 'slide_in'){
       slideX += SLIDE_SPEED * (dt/16);
       if(slideX >= 0){ slideX = 0; phase='sketch'; timer=0; activeExplIdx=0; }
-      renderFrame(si, 0, slideX, 0, 0);
+      renderFrame(si, slideX, 0, 0);
     } else if(phase === 'sketch'){
       timer += dt;
       const p = Math.min(1, timer / SKETCH_MS_PER_IMG);
-      renderFrame(si, 0, 0, activeExplIdx, p);
+      renderFrame(si, 0, activeExplIdx, p);
       if(p >= 1){
         activeExplIdx++;
         timer = 0;
-        if(activeExplIdx >= nImgs){ phase='typing'; charCount=0; }
+        if(activeExplIdx >= nImgs){ phase='hold'; }
       }
-    } else if(phase === 'typing'){
-      timer += dt; charCount = Math.floor(timer / CHAR_SPEED);
-      if(charCount >= total){ charCount = total; phase='hold'; timer=0; }
-      renderFrame(si, charCount, 0, nImgs, 1);
     } else if(phase === 'hold'){
       timer += dt;
-      renderFrame(si, total, 0, nImgs, 1);
+      renderFrame(si, 0, nImgs, 1);
       if(timer >= HOLD_MS){
         si++;
         if(si >= scenes.length){
@@ -785,7 +704,7 @@ function runAnimation(onComplete){
           if(onComplete) onComplete();
           return;
         }
-        phase='slide_in'; slideX=-CW; charCount=0; timer=0; activeExplIdx=0;
+        phase='slide_in'; slideX=-CW; timer=0; activeExplIdx=0;
       }
     }
     rafId = requestAnimationFrame(frame);
@@ -833,9 +752,7 @@ async function downloadVideo(){
 function resetAll(){
   if(!confirm('Reset everything? This clears your script, images, and scenes.')) return;
   isPlaying = false; if(rafId) cancelAnimationFrame(rafId);
-  scenes = []; draftChar = null; draftExpl = []; scriptCursor = 0;
-  document.getElementById('scriptInput').value = '';
-  document.getElementById('captionInput').value = '';
+  scenes = []; draftChar = null; draftExpl = [];
   renderCharRow(); renderExplRow(); renderSceneList();
   document.getElementById('sceneNumLabel').textContent = '1';
   document.getElementById('sceneCard').style.display = 'none';
