@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>Explainer Video Maker</title>
+<style>
+:root{
+  --bg:#0d0d14;
+  --panel:#15151f;
+  --panel2:#1c1c29;
+  --line:#2a2a3a;
+  --text:#e7e7ee;
+  --muted:#86869a;
+  --accent:#5b8cff;
+  --accent2:#3ddc97;
+  --warn:#ff5d5d;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,sans-serif;}
+body{height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
+
+#topbar{
+  flex-shrink:0;
+  padding:12px 14px;
+  background:var(--panel);
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;
+}
+#topbar h1{font-size:15px;font-weight:700;letter-spacing:-0.2px;}
+#keyBtn{
+  font-size:11px;color:var(--muted);background:var(--panel2);
+  border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;
+}
+#keyBtn.set{color:var(--accent2);}
+
+#scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+#scroll-inner{padding:14px;display:flex;flex-direction:column;gap:14px;padding-bottom:30px;}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+}
+.card h2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:10px;}
+.card .hint{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.4;}
+
+textarea{
+  width:100%;background:var(--panel2);border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;
+  resize:vertical;min-height:90px;outline:none;font-family:inherit;line-height:1.4;
+}
+textarea:focus{border-color:var(--accent);}
+
+.uploadRow{display:flex;gap:8px;flex-wrap:wrap;}
+.uploadBox{
+  width:64px;height:64px;border-radius:10px;
+  border:1.5px dashed var(--line);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;position:relative;overflow:hidden;
+  background:var(--panel2);
+}
+.uploadBox.add{color:var(--muted);font-size:24px;}
+.uploadBox img{width:100%;height:100%;object-fit:cover;}
+.uploadBox .rm{
+  position:absolute;top:2px;right:2px;width:18px;height:18px;
+  background:rgba(0,0,0,0.65);border-radius:50%;color:#fff;font-size:11px;
+  display:flex;align-items:center;justify-content:center;
+}
+.uploadBox .idx{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(0,0,0,0.6);color:#fff;font-size:9px;text-align:center;padding:1px 0;
+}
+input[type=file]{display:none;}
+
+.btnRow{display:flex;gap:8px;margin-top:4px;}
+button{
+  font-family:inherit;border:none;border-radius:10px;cursor:pointer;
+  font-weight:700;font-size:13px;padding:11px 14px;
+}
+button:disabled{opacity:0.35;cursor:not-allowed;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#7b5bff);color:#fff;flex:1;}
+.btn-ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line);}
+.btn-danger{background:rgba(255,93,93,0.12);color:var(--warn);border:1px solid rgba(255,93,93,0.3);}
+.btn-success{background:linear-gradient(135deg,#1e9e6a,#3ddc97);color:#06251a;}
+
+#stageCard{padding:0;overflow:hidden;}
+#stageWrap{
+  background:#0a0a10;aspect-ratio:9/16;width:100%;
+  display:flex;align-items:center;justify-content:center;position:relative;
+}
+#stage{width:100%;height:100%;object-fit:contain;}
+#stageEmpty{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:var(--muted);font-size:13px;text-align:center;padding:20px;
+}
+
+#sceneList{display:flex;flex-direction:column;gap:8px;}
+.sceneRow{
+  display:flex;align-items:center;gap:10px;
+  background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+  padding:8px 10px;
+}
+.sceneRow .num{
+  width:22px;height:22px;border-radius:6px;background:var(--accent);
+  color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.sceneRow .thumb{width:30px;height:30px;border-radius:6px;object-fit:cover;flex-shrink:0;background:#000;}
+.sceneRow .info{flex:1;min-width:0;}
+.sceneRow .cap{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sceneRow .meta{font-size:10.5px;color:var(--muted);}
+.sceneRow .delBtn{
+  width:26px;height:26px;border-radius:7px;background:rgba(255,93,93,0.12);
+  color:var(--warn);font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+
+#status{font-size:12px;color:var(--accent2);font-weight:600;text-align:center;min-height:16px;}
+
+#overlay{
+  position:fixed;inset:0;background:rgba(8,8,14,0.92);
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:50;
+  padding:20px;text-align:center;
+}
+.spin{width:38px;height:38px;border:3px solid rgba(91,140,255,0.2);border-top:3px solid var(--accent);border-radius:50%;animation:sp 0.8s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+#overlayTxt{font-size:13px;color:var(--text);font-weight:600;}
+
+#keyModal{
+  position:fixed;inset:0;background:rgba(8,8,14,0.92);
+  display:none;align-items:center;justify-content:center;z-index:60;padding:20px;
+}
+#keyModal .box{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:18px;width:100%;max-width:360px;
+}
+#keyModal h3{font-size:14px;margin-bottom:10px;}
+#keyModal p{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;}
+#keyInput{
+  width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;
+  padding:9px 10px;color:var(--text);font-size:13px;margin-bottom:10px;outline:none;font-family:monospace;
+}
+#keyInput:focus{border-color:var(--accent);}
+
+::-webkit-scrollbar{display:none;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>🎬 Explainer Video Maker</h1>
+  <button id="keyBtn" onclick="openKeyModal()">Set API Key</button>
+</div>
+
+<div id="scroll"><div id="scroll-inner">
+
+  <div class="card">
+    <h2>1 · Script</h2>
+    <textarea id="scriptInput" placeholder="Paste or type your script…"></textarea>
+  </div>
+
+  <div class="card">
+    <h2>2 · Character (same person/thing, different poses)</h2>
+    <div class="uploadRow" id="charRow">
+      <label class="uploadBox add"><input type="file" accept="image/*" multiple onchange="addImages(event,'char')">+</label>
+    </div>
+    <div class="hint">Upload a few images of your constant character — happy, sad, climbing, running, etc. The AI will match one to each scene's mood.</div>
+  </div>
+
+  <div class="card">
+    <h2>3 · Explainer images (sets your scene count)</h2>
+    <div class="uploadRow" id="explRow">
+      <label class="uploadBox add"><input type="file" accept="image/*" multiple onchange="addImages(event,'expl')">+</label>
+    </div>
+    <div class="hint">Upload in the order you want them to appear. Image 1 → scene 1, image 2 → scene 2, and so on. Number of images = number of scenes.</div>
+  </div>
+
+  <div class="card">
+    <h2>4 · Generate</h2>
+    <button class="btn-primary" id="genBtn" onclick="generateScenes()" style="width:100%">✨ Generate Scenes</button>
+    <div id="status" style="margin-top:10px;">Add a script and your images to begin.</div>
+  </div>
+
+  <div class="card" id="sceneCard" style="display:none">
+    <h2>Scenes</h2>
+    <div id="sceneList"></div>
+  </div>
+
+  <div class="card" id="stageCard" style="display:none">
+    <div id="stageWrap">
+      <canvas id="stage"></canvas>
+      <div id="stageEmpty">Generate scenes to preview</div>
+    </div>
+  </div>
+
+  <div class="card" id="ctrlCard" style="display:none">
+    <div class="btnRow">
+      <button class="btn-primary" id="playBtn" onclick="playVideo()" disabled>▶ Play</button>
+      <button class="btn-success" id="saveBtn" onclick="downloadVideo()" disabled>⬇ Save Video</button>
+    </div>
+    <div class="btnRow">
+      <button class="btn-ghost" id="resetBtn" onclick="resetAll()" style="flex:1">↺ Reset Everything</button>
+    </div>
+  </div>
+
+</div></div>
+
+<div id="overlay">
+  <div class="spin"></div>
+  <div id="overlayTxt">Working…</div>
+</div>
+
+<div id="keyModal">
+  <div class="box">
+    <h3>Anthropic API Key</h3>
+    <p>Stored only in this browser (localStorage), never uploaded anywhere else. Needed to generate scenes from your script.</p>
+    <input id="keyInput" type="password" placeholder="sk-ant-..." autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="btnRow">
+      <button class="btn-ghost" onclick="closeKeyModal()" style="flex:1">Cancel</button>
+      <button class="btn-primary" onclick="saveKey()" style="flex:1">Save</button>
+    </div>
+    <div class="btnRow">
+      <button class="btn-danger" onclick="clearKey()" style="width:100%">Clear saved key</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+let charImages = [];   // [{id, img, dataUrl}]
+let explImages = [];   // [{id, img, dataUrl}]
+let scenes = [];        // [{caption, charIndex, explIndex}]
+let isPlaying = false;
+let rafId = null;
+let mediaRecorder = null;
+let recordedChunks = [];
+let sketchCache = new Map(); // explIndex -> {strokes, w, h}
+
+const CW = 720, CH = 1280;
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d');
+canvas.width = CW; canvas.height = CH;
+
+/* ============================================================
+   API KEY HANDLING
+   ============================================================ */
+function getKey(){ return localStorage.getItem('anthropic_api_key') || ''; }
+function openKeyModal(){
+  document.getElementById('keyInput').value = getKey();
+  document.getElementById('keyModal').style.display = 'flex';
+}
+function closeKeyModal(){ document.getElementById('keyModal').style.display = 'none'; }
+function saveKey(){
+  const v = document.getElementById('keyInput').value.trim();
+  if(v) localStorage.setItem('anthropic_api_key', v);
+  refreshKeyBtn();
+  closeKeyModal();
+}
+function clearKey(){
+  localStorage.removeItem('anthropic_api_key');
+  document.getElementById('keyInput').value = '';
+  refreshKeyBtn();
+}
+function refreshKeyBtn(){
+  const btn = document.getElementById('keyBtn');
+  if(getKey()){ btn.textContent = '🔑 Key Set'; btn.classList.add('set'); }
+  else { btn.textContent = 'Set API Key'; btn.classList.remove('set'); }
+}
+refreshKeyBtn();
+
+/* ============================================================
+   IMAGE UPLOAD
+   ============================================================ */
+let imgIdCounter = 0;
+
+function addImages(event, kind){
+  const files = Array.from(event.target.files || []);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      const img = new Image();
+      img.onload = () => {
+        const entry = { id: imgIdCounter++, img, dataUrl };
+        if(kind === 'char') charImages.push(entry);
+        else explImages.push(entry);
+        renderUploadRow(kind);
+        updateStatus();
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  });
+  event.target.value = '';
+}
+
+function removeImage(kind, id){
+  if(kind === 'char') charImages = charImages.filter(e => e.id !== id);
+  else explImages = explImages.filter(e => e.id !== id);
+  renderUploadRow(kind);
+  updateStatus();
+}
+
+function renderUploadRow(kind){
+  const row = document.getElementById(kind === 'char' ? 'charRow' : 'explRow');
+  const list = kind === 'char' ? charImages : explImages;
+  row.innerHTML = '';
+  list.forEach((entry, i) => {
+    const box = document.createElement('div');
+    box.className = 'uploadBox';
+    box.innerHTML = `
+      <img src="${entry.dataUrl}">
+      <div class="idx">${i+1}</div>
+      <div class="rm">✕</div>
+    `;
+    box.querySelector('.rm').onclick = (e) => { e.stopPropagation(); removeImage(kind, entry.id); };
+    row.appendChild(box);
+  });
+  const addBox = document.createElement('label');
+  addBox.className = 'uploadBox add';
+  addBox.innerHTML = `<input type="file" accept="image/*" multiple onchange="addImages(event,'${kind}')">+`;
+  row.appendChild(addBox);
+}
+
+function updateStatus(){
+  const s = document.getElementById('status');
+  const genBtn = document.getElementById('genBtn');
+  const script = document.getElementById('scriptInput').value.trim();
+  if(!script){ s.textContent = 'Add a script to begin.'; genBtn.disabled = true; return; }
+  if(charImages.length === 0){ s.textContent = 'Add at least one character image.'; genBtn.disabled = true; return; }
+  if(explImages.length === 0){ s.textContent = 'Add at least one explainer image — this sets your scene count.'; genBtn.disabled = true; return; }
+  s.textContent = `Ready — will generate ${explImages.length} scene${explImages.length>1?'s':''}.`;
+  genBtn.disabled = false;
+}
+document.getElementById('scriptInput').addEventListener('input', updateStatus);
+
+/* ============================================================
+   SCENE GENERATION (Claude API)
+   ============================================================ */
+async function generateScenes(){
+  const key = getKey();
+  if(!key){ openKeyModal(); return; }
+  const script = document.getElementById('scriptInput').value.trim();
+  if(!script || explImages.length === 0 || charImages.length === 0) return;
+
+  const n = explImages.length;
+  showOverlay('Writing scenes…');
+  document.getElementById('genBtn').disabled = true;
+
+  try {
+    const charDescs = charImages.map((_, i) => `Character image #${i}`).join(', ');
+    const prompt = `You are storyboarding a short explainer video from this script:
+
+"${script}"
+
+There are exactly ${n} scenes, no more, no less — one per explainer image already chosen by the user. There are ${charImages.length} character pose images available, indexed 0 to ${charImages.length-1} (you cannot see them, but assume they cover a range of moods/actions like neutral, happy, sad, thinking, climbing, celebrating, etc. — pick whichever index best fits the emotional beat of each scene, varying them naturally across the story arc).
+
+Return ONLY a JSON array of exactly ${n} objects, no markdown, no commentary:
+[{"caption": "2-5 word phrase from the script", "charIndex": 0}, ...]
+
+Rules:
+- "caption" must be 2-5 words, punchy, directly drawn from or inspired by the script, in story order
+- "charIndex" must be an integer between 0 and ${charImages.length-1}
+- Scene 1 should introduce the idea, the last scene should land the conclusion
+- Vary charIndex sensibly with the emotional arc of the script
+
+Return only the JSON array.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if(!res.ok){
+      const errText = await res.text();
+      throw new Error(`API error ${res.status}: ${errText.slice(0,200)}`);
+    }
+
+    const data = await res.json();
+    const text = data.content.map(c => c.text || '').join('');
+    const match = text.match(/\[[\s\S]*\]/);
+    if(!match) throw new Error('Could not find JSON in response');
+    const parsed = JSON.parse(match[0]);
+
+    scenes = parsed.slice(0, n).map((s, i) => ({
+      caption: (s.caption || '').trim(),
+      charIndex: Math.max(0, Math.min(charImages.length-1, Number.isInteger(s.charIndex) ? s.charIndex : 0)),
+      explIndex: i
+    }));
+
+    sketchCache.clear();
+    hideOverlay();
+    document.getElementById('genBtn').disabled = false;
+    renderSceneList();
+    document.getElementById('sceneCard').style.display = '';
+    document.getElementById('stageCard').style.display = '';
+    document.getElementById('ctrlCard').style.display = '';
+    document.getElementById('stageEmpty').style.display = 'none';
+    document.getElementById('playBtn').disabled = false;
+    document.getElementById('saveBtn').disabled = false;
+    drawStillFrame(0);
+    setStatusLine(`✅ ${scenes.length} scenes ready — press Play`);
+
+  } catch(err){
+    hideOverlay();
+    document.getElementById('genBtn').disabled = false;
+    setStatusLine('❌ ' + err.message);
+    console.error(err);
+  }
+}
+
+async function regenerateScene(idx){
+  const key = getKey();
+  if(!key){ openKeyModal(); return; }
+  const script = document.getElementById('scriptInput').value.trim();
+  showOverlay(`Rewriting scene ${idx+1}…`);
+  try {
+    const prompt = `Script: "${script}"
+
+This is scene ${idx+1} of ${scenes.length} in a storyboard. Give me ONE replacement scene as JSON only, no markdown:
+{"caption": "2-5 word phrase from the script", "charIndex": 0}
+
+charIndex must be an integer 0 to ${charImages.length-1} (pick whichever pose/mood fits this moment in the story).
+Make it different from a generic/neutral choice — be specific to this moment in the script.
+Return only the JSON object.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 300,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    if(!res.ok) throw new Error(`API error ${res.status}`);
+    const data = await res.json();
+    const text = data.content.map(c => c.text || '').join('');
+    const match = text.match(/\{[\s\S]*\}/);
+    if(!match) throw new Error('Could not parse response');
+    const s = JSON.parse(match[0]);
+    scenes[idx].caption = (s.caption || scenes[idx].caption).trim();
+    scenes[idx].charIndex = Math.max(0, Math.min(charImages.length-1, Number.isInteger(s.charIndex) ? s.charIndex : scenes[idx].charIndex));
+    hideOverlay();
+    renderSceneList();
+    drawStillFrame(idx);
+    setStatusLine(`✅ Scene ${idx+1} regenerated`);
+  } catch(err){
+    hideOverlay();
+    setStatusLine('❌ ' + err.message);
+  }
+}
+
+function deleteScene(idx){
+  if(!confirm(`Delete scene ${idx+1} and regenerate it?`)) return;
+  regenerateScene(idx);
+}
+
+function renderSceneList(){
+  const list = document.getElementById('sceneList');
+  list.innerHTML = '';
+  scenes.forEach((sc, i) => {
+    const row = document.createElement('div');
+    row.className = 'sceneRow';
+    const charThumb = charImages[sc.charIndex] ? charImages[sc.charIndex].dataUrl : '';
+    const explThumb = explImages[sc.explIndex] ? explImages[sc.explIndex].dataUrl : '';
+    row.innerHTML = `
+      <div class="num">${i+1}</div>
+      <img class="thumb" src="${charThumb}">
+      <img class="thumb" src="${explThumb}">
+      <div class="info">
+        <div class="cap">${escapeHtml(sc.caption)}</div>
+        <div class="meta">char #${sc.charIndex+1} · image #${sc.explIndex+1}</div>
+      </div>
+      <div class="delBtn">↺</div>
+    `;
+    row.querySelector('.delBtn').onclick = () => deleteScene(i);
+    row.onclick = (e) => { if(e.target.closest('.delBtn')) return; drawStillFrame(i); };
+    list.appendChild(row);
+  });
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+/* ============================================================
+   SKETCH EDGE EXTRACTION (for explainer images)
+   ============================================================ */
+// Downscales the image, runs a simple Sobel edge filter, then walks
+// the edge map into short connected strokes that can be drawn in sequence.
+function buildSketchStrokes(image){
+  const W = 160, H = Math.round(160 * image.height / image.width);
+  const off = document.createElement('canvas');
+  off.width = W; off.height = H;
+  const octx = off.getContext('2d');
+  octx.drawImage(image, 0, 0, W, H);
+  const data = octx.getImageData(0, 0, W, H).data;
+
+  // grayscale
+  const gray = new Float32Array(W*H);
+  for(let i=0;i<W*H;i++){
+    const r=data[i*4], g=data[i*4+1], b=data[i*4+2];
+    gray[i] = 0.299*r + 0.587*g + 0.114*b;
+  }
+
+  // sobel
+  const edge = new Uint8Array(W*H);
+  const gx = [-1,0,1,-2,0,2,-1,0,1], gy = [-1,-2,-1,0,0,0,1,2,1];
+  for(let y=1;y<H-1;y++){
+    for(let x=1;x<W-1;x++){
+      let sx=0, sy=0, k=0;
+      for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){
+        const v = gray[(y+dy)*W+(x+dx)];
+        sx += v*gx[k]; sy += v*gy[k]; k++;
+      }
+      const mag = Math.sqrt(sx*sx+sy*sy);
+      edge[y*W+x] = mag > 90 ? 1 : 0;
+    }
+  }
+
+  // walk edge pixels into short strokes (greedy nearest-neighbor chains)
+  const visited = new Uint8Array(W*H);
+  const strokes = [];
+  for(let y=0;y<H;y++){
+    for(let x=0;x<W;x++){
+      const idx = y*W+x;
+      if(!edge[idx] || visited[idx]) continue;
+      // walk a chain from here
+      let cx=x, cy=y;
+      const pts = [[cx,cy]];
+      visited[idx]=1;
+      let steps=0;
+      while(steps<40){
+        steps++;
+        let found=false;
+        for(let dy=-1;dy<=1 && !found;dy++){
+          for(let dx=-1;dx<=1 && !found;dx++){
+            if(dx===0&&dy===0) continue;
+            const nx=cx+dx, ny=cy+dy;
+            if(nx<0||ny<0||nx>=W||ny>=H) continue;
+            const nidx=ny*W+nx;
+            if(edge[nidx] && !visited[nidx]){
+              visited[nidx]=1; pts.push([nx,ny]); cx=nx; cy=ny; found=true;
+            }
+          }
+        }
+        if(!found) break;
+      }
+      if(pts.length>=2) strokes.push(pts);
+    }
+  }
+  return { strokes, w: W, h: H };
+}
+
+function getSketchData(explIndex){
+  if(sketchCache.has(explIndex)) return sketchCache.get(explIndex);
+  const entry = explImages[explIndex];
+  const data = buildSketchStrokes(entry.img);
+  sketchCache.set(explIndex, data);
+  return data;
+}
+
+/* ============================================================
+   LAYOUT CONSTANTS
+   ============================================================ */
+const CHAR_BOX = { x: 30, y: CH - 560, w: 320, h: 480 };
+const EXPL_BOX = { x: 380, y: 260, w: 310, h: 310 };
+const CAPTION_Y = 100;
+
+function drawBG(){
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0,0,CW,CH);
+}
+
+function drawCaption(text, charCount){
+  if(!text) return;
+  const shown = text.substring(0, charCount);
+  ctx.font = 'bold 52px -apple-system, Arial, sans-serif';
+  ctx.fillStyle = '#16213e';
+  ctx.textBaseline = 'top';
+  // wrap to fit width
+  const maxW = CW - 60;
+  const words = shown.split(' ');
+  let line = '', y = CAPTION_Y;
+  const lines = [];
+  for(const w of words){
+    const test = line ? line + ' ' + w : w;
+    if(ctx.measureText(test).width > maxW && line){ lines.push(line); line = w; }
+    else line = test;
+  }
+  if(line) lines.push(line);
+  lines.forEach((l, i) => ctx.fillText(l, 30, y + i*62));
+}
+
+function drawCharacter(entry, box){
+  if(!entry) return;
+  const img = entry.img;
+  const scale = Math.min(box.w/img.width, box.h/img.height);
+  const w = img.width*scale, h = img.height*scale;
+  const x = box.x + (box.w-w)/2, y = box.y + (box.h-h)/2;
+  ctx.drawImage(img, x, y, w, h);
+}
+
+// Draws the explainer image build up progressively as sketch strokes,
+// then crossfades to the full color image once strokeProgress >= 1.
+function drawExplainerSketch(entry, explIndex, box, strokeProgress, colorFade){
+  if(!entry) return;
+  const { strokes, w, h } = getSketchData(explIndex);
+  const scale = Math.min(box.w/w, box.h/h);
+  const ox = box.x + (box.w - w*scale)/2;
+  const oy = box.y + (box.h - h*scale)/2;
+
+  ctx.save();
+  ctx.translate(ox, oy);
+  ctx.scale(scale, scale);
+
+  const totalPts = strokes.reduce((a,s)=>a+s.length,0);
+  let budget = Math.floor(totalPts * strokeProgress);
+
+  ctx.strokeStyle = '#16213e';
+  ctx.lineWidth = 1.6 / scale;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  for(const s of strokes){
+    if(budget <= 0) break;
+    const take = Math.min(s.length, budget);
+    if(take < 2){ budget -= take; continue; }
+    ctx.beginPath();
+    ctx.moveTo(s[0][0], s[0][1]);
+    for(let i=1;i<take;i++) ctx.lineTo(s[i][0], s[i][1]);
+    ctx.stroke();
+    budget -= take;
+  }
+  ctx.restore();
+
+  if(colorFade > 0){
+    ctx.save();
+    ctx.globalAlpha = colorFade;
+    const cw = entry.img.width, ch = entry.img.height;
+    const cscale = Math.min(box.w/cw, box.h/ch);
+    const cx = box.x + (box.w-cw*cscale)/2, cy = box.y + (box.h-ch*cscale)/2;
+    ctx.drawImage(entry.img, cx, cy, cw*cscale, ch*cscale);
+    ctx.restore();
+  }
+}
+
+/* ============================================================
+   FRAME RENDERING
+   ============================================================ */
+function renderFrame(sceneIdx, charCount, slideX, strokeProgress, colorFade){
+  drawBG();
+  if(!scenes.length) return;
+  const sc = scenes[sceneIdx];
+  const charEntry = charImages[sc.charIndex];
+  const explEntry = explImages[sc.explIndex];
+
+  ctx.save();
+  ctx.translate(slideX, 0);
+  drawCaption(sc.caption, charCount);
+  drawCharacter(charEntry, CHAR_BOX);
+  drawExplainerSketch(explEntry, sc.explIndex, EXPL_BOX, strokeProgress, colorFade);
+  ctx.restore();
+}
+
+function drawStillFrame(idx){
+  renderFrame(idx, scenes[idx] ? scenes[idx].caption.length : 0, 0, 1, 1);
+}
+
+/* ============================================================
+   ANIMATION / PLAYBACK
+   ============================================================ */
+function playVideo(){
+  if(!scenes.length) return;
+  if(isPlaying){
+    isPlaying = false;
+    cancelAnimationFrame(rafId);
+    document.getElementById('playBtn').textContent = '▶ Play';
+    setStatusLine('⏸ Paused');
+    return;
+  }
+  isPlaying = true;
+  document.getElementById('playBtn').textContent = '⏸ Pause';
+  setStatusLine('▶ Playing…');
+  runAnimation();
+}
+
+function runAnimation(onComplete){
+  let si = 0, charCount = 0, slideX = -CW, phase = 'slide_in', timer = 0, last = null;
+  const SLIDE_SPEED = 16, CHAR_SPEED = 45, SKETCH_MS = 1100, HOLD_MS = 1300;
+
+  function frame(ts){
+    if(!isPlaying) return;
+    const dt = last ? Math.min(ts-last, 50) : 16; last = ts;
+    const sc = scenes[si];
+    const total = sc.caption.length;
+
+    if(phase === 'slide_in'){
+      slideX += SLIDE_SPEED * (dt/16);
+      if(slideX >= 0){ slideX = 0; phase = 'sketch'; timer = 0; }
+      renderFrame(si, 0, slideX, 0, 0);
+    } else if(phase === 'sketch'){
+      timer += dt;
+      const p = Math.min(1, timer / SKETCH_MS);
+      renderFrame(si, 0, 0, p, p > 0.85 ? (p-0.85)/0.15 : 0);
+      if(p >= 1){ phase = 'typing'; timer = 0; charCount = 0; }
+    } else if(phase === 'typing'){
+      timer += dt; charCount = Math.floor(timer / CHAR_SPEED);
+      if(charCount >= total){ charCount = total; phase = 'hold'; timer = 0; }
+      renderFrame(si, charCount, 0, 1, 1);
+    } else if(phase === 'hold'){
+      timer += dt;
+      renderFrame(si, total, 0, 1, 1);
+      if(timer >= HOLD_MS){
+        si++;
+        if(si >= scenes.length){
+          isPlaying = false;
+          document.getElementById('playBtn').textContent = '▶ Play Again';
+          setStatusLine('✅ Done!');
+          if(onComplete) onComplete();
+          return;
+        }
+        phase = 'slide_in'; slideX = -CW; charCount = 0; timer = 0;
+      }
+    }
+    rafId = requestAnimationFrame(frame);
+  }
+  rafId = requestAnimationFrame(frame);
+}
+
+/* ============================================================
+   EXPORT
+   ============================================================ */
+async function downloadVideo(){
+  if(!scenes.length || isPlaying) return;
+  setStatusLine('⏺ Recording…');
+  document.getElementById('saveBtn').disabled = true;
+  document.getElementById('playBtn').disabled = true;
+  recordedChunks = [];
+
+  const stream = canvas.captureStream(30);
+  const mime = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm']
+    .find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
+  mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
+  mediaRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(recordedChunks, { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'explainer-video.webm'; a.click();
+    URL.revokeObjectURL(url);
+    setStatusLine('✅ Saved!');
+    document.getElementById('saveBtn').disabled = false;
+    document.getElementById('playBtn').disabled = false;
+  };
+
+  mediaRecorder.start();
+  isPlaying = true;
+  document.getElementById('playBtn').textContent = '⏺ Recording…';
+  runAnimation(() => {
+    if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    document.getElementById('playBtn').textContent = '▶ Play Again';
+  });
+}
+
+/* ============================================================
+   MISC
+   ============================================================ */
+function resetAll(){
+  if(!confirm('Reset everything? This clears your script, images, and scenes.')) return;
+  isPlaying = false;
+  if(rafId) cancelAnimationFrame(rafId);
+  charImages = []; explImages = []; scenes = []; sketchCache.clear();
+  document.getElementById('scriptInput').value = '';
+  renderUploadRow('char'); renderUploadRow('expl');
+  document.getElementById('sceneCard').style.display = 'none';
+  document.getElementById('stageCard').style.display = 'none';
+  document.getElementById('ctrlCard').style.display = 'none';
+  document.getElementById('stageEmpty').style.display = 'flex';
+  ctx.clearRect(0,0,CW,CH);
+  updateStatus();
+}
+
+function setStatusLine(msg){ document.getElementById('status').textContent = msg; }
+function showOverlay(msg){
+  document.getElementById('overlayTxt').textContent = msg;
+  document.getElementById('overlay').style.display = 'flex';
+}
+function hideOverlay(){ document.getElementById('overlay').style.display = 'none'; }
+
+renderUploadRow('char');
+renderUploadRow('expl');
+</script>
+</body>
+</html>
