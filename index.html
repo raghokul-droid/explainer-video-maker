@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+  <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -468,310 +469,333 @@ function fitInCell(img, cell, innerPad){
 }
 
 /* ============================================================
-   SKETCH ENGINE — natural artist drawing
+   SKETCH ENGINE — cinematic pre-render + compositing
    ============================================================
-   Philosophy:
-   1. Higher working resolution (320px) for cleaner strokes
-   2. Longer stroke chains (up to 200 steps) = continuous sweeping lines
-   3. Strokes sorted longest-first = main outlines before details
-   4. Variable speed: each stroke eases in/out like a real hand
-   5. Inter-stroke pause budget = pen-lift moments between strokes
-   6. Slight hand wobble on every point for organic feel
-   7. Pressure variation: lineWidth varies per stroke (2.5–3.5px)
-   8. Long strokes get a faint second reinforcing pass (artist habit)
+   Architecture:
+   - All strokes are extracted ONCE and rendered to an offscreen
+     canvas at full output resolution (not a tiny 160px thumbnail).
+   - During animation, we reveal the pre-rendered sketch canvas
+     stroke-by-stroke using a point-budget approach — O(1) per frame.
+   - Stroke ORDER: long outline strokes first, then medium, then fine
+     detail — exactly the order a real artist works.
+   - Each stroke is drawn as a Catmull-Rom spline (smooth curves,
+     not jagged lineTo chains).
+   - Pressure variation and slight wobble applied per stroke.
+   - No reprocessing happens during animation — buttery smooth.
 */
 
-// Seeded random so wobble is consistent across redraws
+/* ── helpers ─────────────────────────────────────────── */
 function seededRand(seed){
-  let s = seed | 0;
-  return function(){
-    s = (s * 1664525 + 1013904223) & 0xffffffff;
-    return (s >>> 0) / 0xffffffff;
-  };
+  let s = seed|0;
+  return ()=>{ s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; };
 }
 
-function buildSketchStrokes(image){
-  const W = 320, H = Math.round(320 * image.height / image.width);
+// Catmull-Rom spline through pts — draws smooth curves, not jagged lines
+function catmullRomPath(oc, pts, alpha){
+  if(pts.length<2) return;
+  alpha = alpha||0.5;
+  oc.moveTo(pts[0][0], pts[0][1]);
+  for(let i=0;i<pts.length-1;i++){
+    const p0=pts[Math.max(0,i-1)], p1=pts[i], p2=pts[i+1], p3=pts[Math.min(pts.length-1,i+2)];
+    const cp1x=p1[0]+(p2[0]-p0[0])/6*alpha*3;
+    const cp1y=p1[1]+(p2[1]-p0[1])/6*alpha*3;
+    const cp2x=p2[0]-(p3[0]-p1[0])/6*alpha*3;
+    const cp2y=p2[1]-(p3[1]-p1[1])/6*alpha*3;
+    oc.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,p2[0],p2[1]);
+  }
+}
+
+/* ── edge extraction ─────────────────────────────────── */
+function extractEdges(image, W){
+  const H = Math.round(W * image.height / image.width);
   const off = document.createElement('canvas');
-  off.width = W; off.height = H;
-  const octx = off.getContext('2d');
-  octx.drawImage(image, 0, 0, W, H);
-  const data = octx.getImageData(0, 0, W, H).data;
+  off.width=W; off.height=H;
+  const oc = off.getContext('2d');
+  oc.drawImage(image,0,0,W,H);
+  const px = oc.getImageData(0,0,W,H).data;
 
-  // Grayscale
+  // Grayscale + gaussian blur (5×5 for cleaner edges)
   const gray = new Float32Array(W*H);
-  for(let i=0;i<W*H;i++){
-    const r=data[i*4], g=data[i*4+1], b=data[i*4+2];
-    gray[i] = 0.299*r + 0.587*g + 0.114*b;
+  for(let i=0;i<W*H;i++) gray[i]=0.299*px[i*4]+0.587*px[i*4+1]+0.114*px[i*4+2];
+
+  const blur = new Float32Array(W*H);
+  const gk=[2,4,5,4,2, 4,9,12,9,4, 5,12,15,12,5, 4,9,12,9,4, 2,4,5,4,2];
+  const gks=159;
+  for(let y=2;y<H-2;y++) for(let x=2;x<W-2;x++){
+    let v=0,k=0;
+    for(let dy=-2;dy<=2;dy++) for(let dx=-2;dx<=2;dx++) v+=gray[(y+dy)*W+(x+dx)]*gk[k++];
+    blur[y*W+x]=v/gks;
   }
 
-  // Gaussian blur pass (3×3) to reduce noise before edge detection
-  const blurred = new Float32Array(W*H);
-  const kb=[1,2,1,2,4,2,1,2,1]; const ksum=16;
+  // Sobel
+  const mag=new Float32Array(W*H), ang=new Float32Array(W*H);
+  const kx=[-1,0,1,-2,0,2,-1,0,1], ky=[-1,-2,-1,0,0,0,1,2,1];
   for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++){
-    let v=0; let k=0;
-    for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){v+=gray[(y+dy)*W+(x+dx)]*kb[k++];}
-    blurred[y*W+x]=v/ksum;
-  }
-
-  // Sobel edge detection
-  const mag = new Float32Array(W*H);
-  const gx=[-1,0,1,-2,0,2,-1,0,1], gy=[-1,-2,-1,0,0,0,1,2,1];
-  for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++){
-    let sx=0, sy=0, k=0;
+    let sx=0,sy=0,k=0;
     for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){
-      const v=blurred[(y+dy)*W+(x+dx)]; sx+=v*gx[k]; sy+=v*gy[k]; k++;
+      const v=blur[(y+dy)*W+(x+dx)]; sx+=v*kx[k]; sy+=v*ky[k]; k++;
     }
     mag[y*W+x]=Math.sqrt(sx*sx+sy*sy);
+    ang[y*W+x]=Math.atan2(sy,sx);
   }
 
-  // Non-maximum suppression (thins edges to 1-pixel-wide lines)
-  const edge = new Uint8Array(W*H);
-  const THRESH_HIGH=120, THRESH_LOW=60;
+  // Canny-style non-maximum suppression + double threshold
+  const edge=new Uint8Array(W*H);
+  const HI=90, LO=40;
   for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++){
-    const m=mag[y*W+x]; if(m<THRESH_LOW) continue;
-    const angle=Math.atan2(
-      blurred[y*W+(x+1)]-blurred[y*W+(x-1)],
-      blurred[(y+1)*W+x]-blurred[(y-1)*W+x]
-    )*180/Math.PI;
-    const a=((angle%180)+180)%180;
+    const m=mag[y*W+x]; if(m<LO) continue;
+    const a=((ang[y*W+x]*180/Math.PI)%180+180)%180;
     let m1,m2;
-    if(a<22.5||a>=157.5){m1=mag[y*W+(x-1)];m2=mag[y*W+(x+1)];}
-    else if(a<67.5){m1=mag[(y-1)*W+(x+1)];m2=mag[(y+1)*W+(x-1)];}
+    if(a<22.5||a>=157.5){m1=mag[y*W+x-1];m2=mag[y*W+x+1];}
+    else if(a<67.5){m1=mag[(y-1)*W+x+1];m2=mag[(y+1)*W+x-1];}
     else if(a<112.5){m1=mag[(y-1)*W+x];m2=mag[(y+1)*W+x];}
-    else{m1=mag[(y-1)*W+(x-1)];m2=mag[(y+1)*W+(x+1)];}
-    if(m>=m1&&m>=m2&&m>=THRESH_HIGH) edge[y*W+x]=1;
+    else{m1=mag[(y-1)*W+x-1];m2=mag[(y+1)*W+x+1];}
+    if(m>=m1&&m>=m2&&m>=HI) edge[y*W+x]=2; // strong
+    else if(m>=m1&&m>=m2&&m>=LO) edge[y*W+x]=1; // weak
   }
-
-  // Walk edge pixels into long continuous strokes (greedy chain)
-  const visited = new Uint8Array(W*H);
-  const rawStrokes = [];
-  // Scan in a slightly randomised order to avoid scan-line artefacts
-  const pixels = [];
-  for(let y=0;y<H;y++) for(let x=0;x<W;x++) if(edge[y*W+x]) pixels.push([x,y]);
-  // Shuffle roughly by magnitude so strongest edges start first
-  pixels.sort((a,b)=>mag[b[1]*W+b[0]]-mag[a[1]*W+a[0]]);
-
-  for(const [sx,sy] of pixels){
-    const startIdx=sy*W+sx;
-    if(visited[startIdx]) continue;
-    let cx=sx, cy=sy;
-    const pts=[[cx,cy]]; visited[startIdx]=1; let steps=0;
-    while(steps<200){   // up to 200 steps = long sweeping strokes
-      steps++; let best=-1, bx=cx, by=cy;
-      // prefer continuing in same direction (look-ahead neighbour priority)
-      const dx=pts.length>1?cx-pts[pts.length-2][0]:0;
-      const dy=pts.length>1?cy-pts[pts.length-2][1]:0;
-      let bestScore=-Infinity;
-      for(let ndy=-1;ndy<=1;ndy++) for(let ndx=-1;ndx<=1;ndx++){
-        if(ndx===0&&ndy===0) continue;
-        const nx=cx+ndx, ny=cy+ndy;
-        if(nx<0||ny<0||nx>=W||ny>=H) continue;
-        const nidx=ny*W+nx;
-        if(!edge[nidx]||visited[nidx]) continue;
-        // Score: direction continuity + edge magnitude
-        const dir = dx*ndx+dy*ndy; // dot product — rewards same direction
-        const score = dir*2 + mag[nidx]/255;
-        if(score>bestScore){ bestScore=score; bx=nx; by=ny; best=nidx; }
-      }
-      if(best===-1) break;
-      visited[best]=1; pts.push([bx,by]); cx=bx; cy=by;
-    }
-    if(pts.length>=3) rawStrokes.push(pts);
+  // Hysteresis: promote weak edges connected to strong ones
+  for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++){
+    if(edge[y*W+x]!==1) continue;
+    let hasStrong=false;
+    for(let dy=-1;dy<=1&&!hasStrong;dy++) for(let dx=-1;dx<=1;dx++) if(edge[(y+dy)*W+(x+dx)]===2){hasStrong=true;break;}
+    if(hasStrong) edge[y*W+x]=2; else edge[y*W+x]=0;
   }
-
-  // Sort: longest strokes first (= main outlines drawn before details)
-  rawStrokes.sort((a,b)=>b.length-a.length);
-
-  // Assign natural properties to each stroke
-  const rand = seededRand(42);
-  const strokes = rawStrokes.map((pts, i) => {
-    const isLong = pts.length > 40;
-    // Pressure: long strokes slightly thicker (confident outline strokes)
-    const pressure = 2.5 + rand()*1.0 + (isLong ? 0.4 : 0);
-    // Wobble seed — unique per stroke
-    const wobbleSeed = (i * 1664525 + 1013904223) & 0xffffffff;
-    return { pts, pressure, isLong, wobbleSeed };
-  });
-
-  // Build a flat timeline: each "slot" is either a stroke segment or a tiny pause
-  // Pauses are inserted between every N strokes to simulate pen-lifts
-  const timeline = [];
-  const PAUSE_EVERY = 4; // insert a micro-pause every 4 strokes
-  const PAUSE_WEIGHT = 0.008; // fraction of total time per pause
-
-  strokes.forEach((s, i) => {
-    timeline.push({ type:'stroke', data:s });
-    if((i+1) % PAUSE_EVERY === 0) timeline.push({ type:'pause', weight: PAUSE_WEIGHT });
-  });
-
-  // Pre-compute cumulative weights for time mapping
-  const strokeWeight = (1 - timeline.filter(t=>t.type==='pause').length * PAUSE_WEIGHT)
-                       / strokes.length;
-  let cum = 0;
-  const weights = timeline.map(t => {
-    const w = t.type==='pause' ? t.weight : strokeWeight;
-    const start = cum; cum += w;
-    return { ...t, tStart: start, tEnd: cum };
-  });
-
-  return { timeline: weights, w: W, h: H };
+  return {edge,mag,W,H};
 }
 
-function getSketchData(scene, explIdx){
-  if(!scene.sketchCache) scene.sketchCache = [];
+/* ── stroke walking ──────────────────────────────────── */
+function walkStrokes(edge, mag, W, H){
+  const visited=new Uint8Array(W*H);
+  const strokes=[];
+
+  // Start from strongest edges first so major outlines get longest chains
+  const seeds=[];
+  for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++) if(edge[y*W+x]===2) seeds.push([x,y,mag[y*W+x]]);
+  seeds.sort((a,b)=>b[2]-a[2]);
+
+  for(const [sx,sy] of seeds){
+    if(visited[sy*W+sx]) continue;
+    let cx=sx,cy=sy;
+    const pts=[[cx,cy]]; visited[sy*W+sx]=1;
+    let pdx=0,pdy=0;
+
+    for(let step=0;step<400;step++){
+      let best=-1,bx=0,by=0,bestScore=-Infinity;
+      for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){
+        if(!dx&&!dy) continue;
+        const nx=cx+dx,ny=cy+dy;
+        if(nx<1||ny<1||nx>=W-1||ny>=H-1) continue;
+        const ni=ny*W+nx;
+        if(!edge[ni]||visited[ni]) continue;
+        // direction continuity score + edge strength
+        const dir=pdx*dx+pdy*dy;
+        const score=dir*3+mag[ni]/180;
+        if(score>bestScore){bestScore=score;bx=nx;by=ny;best=ni;}
+      }
+      if(best===-1) break;
+      pdx=bx-cx; pdy=by-cy;
+      visited[best]=1; pts.push([bx,by]); cx=bx; cy=by;
+    }
+    if(pts.length>=4) strokes.push(pts);
+  }
+  return strokes;
+}
+
+/* ── artist ordering ─────────────────────────────────── */
+function orderStrokesNaturally(strokes, W, H){
+  // Three passes: outlines (long) → shapes (medium) → details (short)
+  const long  = strokes.filter(s=>s.length>80).sort((a,b)=>b.length-a.length);
+  const med   = strokes.filter(s=>s.length>=20&&s.length<=80).sort((a,b)=>b.length-a.length);
+  const short = strokes.filter(s=>s.length<20).sort((a,b)=>b.length-a.length);
+  return [...long,...med,...short];
+}
+
+/* ── pre-render to offscreen canvas ─────────────────── */
+function buildSketchData(image, targetW, targetH){
+  const WORK_W = 512; // higher res working canvas for clean lines
+  const {edge,mag,W,H} = extractEdges(image, WORK_W);
+  const rawStrokes = walkStrokes(edge, mag, W, H);
+  const ordered = orderStrokesNaturally(rawStrokes, W, H);
+
+  // Scale strokes from working space to target output space
+  const sx = targetW/W, sy = targetH/H;
+  const rand = seededRand(0xdeadbeef);
+
+  const finalStrokes = ordered.map((pts,i)=>{
+    const isLong = pts.length > 80;
+    const isMed  = pts.length >= 20;
+    // Pressure: outlines thicker, details finer — like a real artist
+    const base = isLong ? 3.2 : isMed ? 2.6 : 2.0;
+    const pressure = base + rand()*0.6;
+    const alpha = isLong ? 0.92 : isMed ? 0.82 : 0.70;
+    // Scale + tiny organic wobble (consistent per stroke via seeded rand)
+    const wRand = seededRand(i*999983+7);
+    const wobAmt = isLong ? 0.4 : 0.2;
+    const scaled = pts.map(([x,y])=>[
+      x*sx + (wRand()-0.5)*wobAmt,
+      y*sy + (wRand()-0.5)*wobAmt
+    ]);
+    return {pts:scaled, pressure, alpha, isLong, isMed};
+  });
+
+  // Build cumulative point index for O(1) animation frame lookup
+  // Time is proportional to number of points — longer strokes take longer
+  const totalPts = finalStrokes.reduce((a,s)=>a+s.pts.length,0);
+  let cum=0;
+  const timeline = finalStrokes.map(s=>{
+    const w = s.pts.length/totalPts;
+    const tStart=cum; cum+=w;
+    return {...s, tStart, tEnd:cum};
+  });
+
+  // Pre-render completed sketch to an offscreen canvas ONCE
+  // (used when progress=1 — just blit this, don't re-stroke)
+  const preCanvas = document.createElement('canvas');
+  preCanvas.width=targetW; preCanvas.height=targetH;
+  const pc = preCanvas.getContext('2d');
+  pc.lineCap='round'; pc.lineJoin='round';
+  for(const s of finalStrokes){
+    pc.globalAlpha=s.alpha;
+    pc.strokeStyle='#1c1c2e';
+    pc.lineWidth=s.pressure;
+    pc.beginPath();
+    catmullRomPath(pc, s.pts, 0.5);
+    pc.stroke();
+  }
+  pc.globalAlpha=1;
+
+  return {timeline, preCanvas, totalPts};
+}
+
+/* ── per-scene cache ──────────────────────────────────── */
+function getSketchData(scene, explIdx, cell){
+  if(!scene.sketchCache) scene.sketchCache=[];
   if(scene.sketchCache[explIdx]) return scene.sketchCache[explIdx];
-  const data = buildSketchStrokes(scene.explImgs[explIdx].img);
-  scene.sketchCache[explIdx] = data;
+  const r = fitInCell(scene.explImgs[explIdx].img, cell, ZONE_PAD*0.5);
+  const data = buildSketchData(scene.explImgs[explIdx].img, Math.round(r.w), Math.round(r.h));
+  scene.sketchCache[explIdx]=data;
   return data;
 }
 
 /* ============================================================
    DRAWING
    ============================================================ */
-function drawBG(){ ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,CW,CH); }
+function drawBG(){ ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,CW,CH); }
 
 function drawCharacter(entry){
   if(!entry) return;
-  const r = fitInCell(entry.img, LEFT_ZONE, ZONE_PAD);
+  const r=fitInCell(entry.img, LEFT_ZONE, ZONE_PAD);
   ctx.drawImage(entry.img, r.x, r.y, r.w, r.h);
 }
 
-// Smoothstep easing — makes strokes feel like they accelerate and decelerate
 function smoothstep(t){ return t*t*(3-2*t); }
 
-// Wobble: small organic jitter on a point using a per-stroke seeded sequence
-function wobble(x, y, rand, amt){ return [x + (rand()-0.5)*amt, y + (rand()-0.5)*amt]; }
+function drawExplainerCell(entry, scene, explIdx, cell, progress){
+  const r = fitInCell(entry.img, cell, ZONE_PAD*0.5);
+  const sd = getSketchData(scene, explIdx, cell);
+  const {timeline, preCanvas} = sd;
 
-function drawExplainerCell(entry, sketchData, cell, progress){
-  const r = fitInCell(entry.img, cell, ZONE_PAD * 0.5);
-  const { timeline, w } = sketchData;
-  const scale = r.w / w;
+  if(progress <= 0) return null;
 
-  ctx.save();
-  ctx.translate(r.x, r.y);
-  ctx.scale(scale, scale);
-  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  // If complete — just blit the pre-rendered canvas, O(1)
+  if(progress >= 1){
+    ctx.drawImage(preCanvas, r.x, r.y);
+    // Fade in colour image on top
+    ctx.save();
+    ctx.globalAlpha = Math.min(1,(progress-0.92)/0.08);
+    ctx.drawImage(entry.img, r.x, r.y, r.w, r.h);
+    ctx.restore();
+    return null;
+  }
+
+  // Ease the overall progress so the drawing feels like it
+  // starts confidently, flows through the middle, then slows
+  // slightly on fine details at the end
+  const eased = progress < 0.7
+    ? smoothstep(progress/0.7)*0.7
+    : 0.7 + smoothstep((progress-0.7)/0.3)*0.3;
 
   let penPt = null;
 
+  ctx.save();
+  ctx.lineCap='round'; ctx.lineJoin='round';
+
   for(const slot of timeline){
-    if(slot.tStart >= progress) break;  // not reached yet
+    if(slot.tStart >= eased) break; // not reached yet in time
 
-    if(slot.type === 'pause') continue; // just a time gap, nothing drawn
+    const slotP = Math.min(1,(eased-slot.tStart)/(slot.tEnd-slot.tStart));
+    // Ease within each individual stroke: slow start, fast middle, slow end
+    const strokeEase = smoothstep(slotP);
+    const take = Math.max(2, Math.floor(slot.pts.length * strokeEase));
 
-    const s = slot.data;
-    const slotProgress = Math.min(1, (progress - slot.tStart) / (slot.tEnd - slot.tStart));
+    const pts = slot.pts.slice(0, take);
 
-    // Apply smoothstep easing within this stroke
-    const easedProgress = smoothstep(slotProgress);
-    const take = Math.max(2, Math.floor(s.pts.length * easedProgress));
-    if(take < 2) continue;
-
-    const pts = s.pts.slice(0, take);
-    const rand = seededRand(s.wobbleSeed);
-    const wobbleAmt = s.isLong ? 0.9 : 0.5; // longer strokes have slightly more natural wobble
-
-    // Primary stroke
-    ctx.strokeStyle = '#1a1a2e';
-    ctx.lineWidth = s.pressure / scale;
-    ctx.globalAlpha = 0.88;
+    ctx.globalAlpha = slot.alpha;
+    ctx.strokeStyle = '#1c1c2e';
+    ctx.lineWidth = slot.pressure;
     ctx.beginPath();
-    const [wx0, wy0] = wobble(pts[0][0], pts[0][1], rand, wobbleAmt);
-    ctx.moveTo(wx0, wy0);
-    for(let i=1;i<pts.length;i++){
-      const [wx, wy] = wobble(pts[i][0], pts[i][1], rand, wobbleAmt);
-      ctx.lineTo(wx, wy);
-    }
+    catmullRomPath(ctx, pts.map(([x,y])=>[x+r.x, y+r.y]), 0.5);
     ctx.stroke();
 
-    // Reinforcing second pass on long strokes (artist habit of tracing over)
-    if(s.isLong && slotProgress >= 0.98){
-      const rand2 = seededRand(s.wobbleSeed ^ 0xdeadbeef);
-      ctx.strokeStyle = '#1a1a2e';
-      ctx.lineWidth = (s.pressure * 0.6) / scale;
-      ctx.globalAlpha = 0.25;
-      ctx.beginPath();
-      const [wx2, wy2] = wobble(pts[0][0], pts[0][1], rand2, wobbleAmt*1.5);
-      ctx.moveTo(wx2, wy2);
-      for(let i=1;i<Math.floor(pts.length*0.7);i++){
-        const [wx, wy] = wobble(pts[i][0], pts[i][1], rand2, wobbleAmt*1.5);
-        ctx.lineTo(wx, wy);
-      }
-      ctx.stroke();
-    }
-
-    ctx.globalAlpha = 1;
-
-    // Track pen tip position from the last active stroke
-    if(slotProgress < 1 && slotProgress > 0){
+    // Track pen tip at the active (last incomplete) stroke
+    if(slotP < 1){
       const tip = pts[pts.length-1];
-      penPt = { x: r.x + tip[0]*scale, y: r.y + tip[1]*scale };
+      penPt = { x: tip[0]+r.x, y: tip[1]+r.y };
     }
   }
 
+  ctx.globalAlpha=1;
   ctx.restore();
 
-  // Fade in full-colour image once sketch is nearly complete
+  // Colour fade-in at the very end
   if(progress >= 0.92){
     ctx.save();
-    ctx.globalAlpha = Math.min(1, (progress-0.92)/0.08);
+    ctx.globalAlpha = Math.min(1,(progress-0.92)/0.08);
     ctx.drawImage(entry.img, r.x, r.y, r.w, r.h);
     ctx.restore();
   }
+
   return penPt;
 }
 
-// Detailed cartoon hand + pencil icon, sized for a 1280px canvas
+// Clean realistic pencil + hand icon
 function drawHand(x, y, angle){
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(angle);
 
-  // Pencil body (yellow, elongated)
-  ctx.fillStyle = '#f5c518';
-  ctx.beginPath();
-  ctx.roundRect(-60, -7, 58, 14, 3);
-  ctx.fill();
-  // Pencil eraser end
-  ctx.fillStyle = '#f08080';
-  ctx.beginPath();
-  ctx.roundRect(-66, -6, 8, 12, 2);
-  ctx.fill();
-  // Pencil tip (graphite cone)
-  ctx.fillStyle = '#e8e8e8';
-  ctx.beginPath();
-  ctx.moveTo(-2,-7); ctx.lineTo(8,0); ctx.lineTo(-2,7); ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = '#444';
-  ctx.beginPath();
-  ctx.moveTo(5,-3); ctx.lineTo(8,0); ctx.lineTo(5,3); ctx.closePath();
-  ctx.fill();
-  // Pencil wood sharpened section
-  ctx.fillStyle = '#deb887';
-  ctx.beginPath();
-  ctx.moveTo(-2,-7); ctx.lineTo(-16,-7); ctx.lineTo(-16,7); ctx.lineTo(-2,7); ctx.closePath();
-  ctx.fill();
+  // Pencil body
+  ctx.fillStyle='#f5c842';
+  ctx.beginPath(); ctx.roundRect(-58,-7,54,14,3); ctx.fill();
+  // Pencil stripe
+  ctx.fillStyle='#e8b800';
+  ctx.fillRect(-36,-7,6,14);
+  // Eraser ferrule (silver band)
+  ctx.fillStyle='#c0c0c0';
+  ctx.beginPath(); ctx.roundRect(-62,-6,8,12,2); ctx.fill();
+  // Eraser (pink)
+  ctx.fillStyle='#f4a0a0';
+  ctx.beginPath(); ctx.roundRect(-70,-5,10,10,2); ctx.fill();
+  // Wood cone
+  ctx.fillStyle='#c8956c';
+  ctx.beginPath(); ctx.moveTo(-4,-7); ctx.lineTo(-4,7); ctx.lineTo(6,0); ctx.closePath(); ctx.fill();
+  // Graphite tip
+  ctx.fillStyle='#3a3a3a';
+  ctx.beginPath(); ctx.moveTo(3,-2.5); ctx.lineTo(3,2.5); ctx.lineTo(10,0); ctx.closePath(); ctx.fill();
 
-  // Hand (flesh-toned fist holding pencil)
-  ctx.fillStyle = '#fcd9b6';
-  ctx.beginPath();
-  ctx.ellipse(-24, 0, 30, 22, 0.15, 0, Math.PI*2);
-  ctx.fill();
-  ctx.strokeStyle = '#c8956c'; ctx.lineWidth = 1.5;
-  ctx.stroke();
-  // Finger knuckle hints
-  ctx.strokeStyle = '#c8956c'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.arc(-20, -10, 5, 0.2, Math.PI-0.2); ctx.stroke();
-  ctx.beginPath(); ctx.arc(-30, -10, 5, 0.2, Math.PI-0.2); ctx.stroke();
-  ctx.beginPath(); ctx.arc(-38, -9, 4, 0.2, Math.PI-0.2); ctx.stroke();
-
+  // Hand
+  ctx.fillStyle='#fcd9b6';
+  ctx.beginPath(); ctx.ellipse(-26,1,32,22,0.12,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#c8956c'; ctx.lineWidth=1.8; ctx.stroke();
+  // Knuckle lines
+  ctx.strokeStyle='rgba(180,130,90,0.6)'; ctx.lineWidth=1.2;
+  [-18,-28,-36].forEach(kx=>{
+    ctx.beginPath(); ctx.arc(kx,-9,5,0.3,Math.PI-0.3); ctx.stroke();
+  });
   // Thumb
-  ctx.fillStyle = '#fcd9b6';
-  ctx.beginPath();
-  ctx.ellipse(-14, 12, 12, 8, -0.5, 0, Math.PI*2);
-  ctx.fill();
-  ctx.strokeStyle = '#c8956c'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.fillStyle='#fcd9b6';
+  ctx.beginPath(); ctx.ellipse(-13,13,13,8,-0.5,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#c8956c'; ctx.lineWidth=1.5; ctx.stroke();
 
   ctx.restore();
 }
@@ -794,12 +818,11 @@ function renderFrame(sceneIdx, slideX, activeExplIdx, perImageProgress){
 
   let penPt = null, penAngle = -0.3;
   sc.explImgs.forEach((entry, i) => {
-    const sketchData = getSketchData(sc, i);
     let p;
     if(i < activeExplIdx) p = 1;
     else if(i === activeExplIdx) p = perImageProgress;
     else p = 0;
-    const tip = drawExplainerCell(entry, sketchData, cells[i], p);
+    const tip = drawExplainerCell(entry, sc, i, cells[i], p);
     if(i === activeExplIdx && p < 1 && p > 0) penPt = tip;
   });
 
