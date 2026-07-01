@@ -1,178 +1,205 @@
 
-  <!DOCTYPE html>
+    } <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Explainer Video Maker</title>
 <style>
-:root{
-  --bg:#0d0d14;
-  --panel:#15151f;
-  --panel2:#1c1c29;
-  --line:#2a2a3a;
-  --text:#e7e7ee;
-  --muted:#86869a;
-  --accent:#5b8cff;
-  --accent2:#3ddc97;
-  --warn:#ff5d5d;
+/* ── Reset & Base ─────────────────────────────────────────── */
+:root {
+  --bg:      #0d0d14;
+  --panel:   #15151f;
+  --panel2:  #1c1c29;
+  --line:    #2a2a3a;
+  --text:    #e7e7ee;
+  --muted:   #86869a;
+  --accent:  #5b8cff;
+  --green:   #3ddc97;
+  --red:     #ff5d5d;
 }
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,sans-serif;}
-body{height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { background: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; }
+body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-#topbar{
-  flex-shrink:0;padding:12px 14px;background:var(--panel);border-bottom:1px solid var(--line);
-  display:flex;align-items:center;justify-content:space-between;gap:8px;
+/* ── Top bar ──────────────────────────────────────────────── */
+#topbar {
+  flex-shrink: 0; padding: 11px 14px;
+  background: var(--panel); border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
-#topbar h1{font-size:15px;font-weight:700;letter-spacing:-0.2px;}
-#freeTag{font-size:10.5px;color:var(--accent2);background:rgba(61,220,151,0.1);border:1px solid rgba(61,220,151,0.3);border-radius:7px;padding:5px 9px;font-weight:700;}
-
-#scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-#scroll-inner{padding:14px;display:flex;flex-direction:column;gap:14px;padding-bottom:30px;}
-
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;}
-.card h2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:10px;}
-.card .hint{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.4;}
-.card .badge{
-  display:inline-block;font-size:11px;font-weight:700;color:var(--accent);
-  background:rgba(91,140,255,0.1);border-radius:6px;padding:3px 8px;margin-bottom:8px;
-}
-
-textarea{
-  width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;
-  padding:10px 12px;color:var(--text);font-size:14px;resize:vertical;min-height:80px;
-  outline:none;font-family:inherit;line-height:1.4;
-}
-textarea:focus{border-color:var(--accent);}
-
-input.capField{
-  width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;
-  padding:10px 12px;color:var(--text);font-size:14px;outline:none;font-family:inherit;
-}
-input.capField:focus{border-color:var(--accent);}
-
-.uploadRow{display:flex;gap:8px;flex-wrap:wrap;}
-.uploadBox{
-  width:60px;height:60px;border-radius:10px;border:1.5px dashed var(--line);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
-  position:relative;overflow:hidden;background:var(--panel2);
-}
-.uploadBox.add{color:var(--muted);font-size:22px;}
-.uploadBox img{width:100%;height:100%;object-fit:cover;}
-.uploadBox .rm{
-  position:absolute;top:2px;right:2px;width:17px;height:17px;background:rgba(0,0,0,0.65);
-  border-radius:50%;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;
-}
-.uploadBox .idx{
-  position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);color:#fff;
-  font-size:9px;text-align:center;padding:1px 0;
-}
-input[type=file]{display:none;}
-
-.btnRow{display:flex;gap:8px;margin-top:4px;}
-button{font-family:inherit;border:none;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;padding:11px 14px;}
-button:disabled{opacity:0.35;cursor:not-allowed;}
-.btn-primary{background:linear-gradient(135deg,var(--accent),#7b5bff);color:#fff;flex:1;}
-.btn-ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line);}
-.btn-danger{background:rgba(255,93,93,0.12);color:var(--warn);border:1px solid rgba(255,93,93,0.3);}
-.btn-success{background:linear-gradient(135deg,#1e9e6a,#3ddc97);color:#06251a;}
-.btn-small{padding:7px 10px;font-size:11.5px;border-radius:8px;}
-
-#stageCard{padding:0;overflow:hidden;}
-#stageWrap{
-  background:#0a0a10;aspect-ratio:16/9;width:100%;
-  display:flex;align-items:center;justify-content:center;position:relative;
-}
-#stage{width:100%;height:100%;object-fit:contain;}
-#stageEmpty{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  color:var(--muted);font-size:13px;text-align:center;padding:20px;
+#topbar h1 { font-size: 14px; font-weight: 800; letter-spacing: -0.2px; }
+.tag { font-size: 10px; font-weight: 700; color: var(--green);
+  background: rgba(61,220,151,.1); border: 1px solid rgba(61,220,151,.3);
+  border-radius: 6px; padding: 4px 8px; }
+#settingsBtn {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  background: var(--panel2); border: 1px solid var(--line);
+  border-radius: 8px; padding: 6px 10px; cursor: pointer; font-family: inherit;
 }
 
-#sceneList{display:flex;flex-direction:column;gap:8px;}
-.sceneRow{
-  display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);
-  border-radius:10px;padding:8px 10px;
+/* ── Scroll area ──────────────────────────────────────────── */
+#scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+#inner  { padding: 12px; display: flex; flex-direction: column; gap: 12px; padding-bottom: 28px; }
+
+/* ── Cards ────────────────────────────────────────────────── */
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 13px; padding: 13px; }
+.card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 9px; }
+.hint { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+.badge { display: inline-block; font-size: 10.5px; font-weight: 700; color: var(--accent);
+  background: rgba(91,140,255,.1); border-radius: 5px; padding: 2px 7px; margin-bottom: 7px; }
+
+/* ── Upload grid ──────────────────────────────────────────── */
+.upload-row { display: flex; gap: 7px; flex-wrap: wrap; }
+.upload-box {
+  width: 58px; height: 58px; border-radius: 9px; border: 1.5px dashed var(--line);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  flex-shrink: 0; position: relative; overflow: hidden; background: var(--panel2);
 }
-.sceneRow .num{
-  width:22px;height:22px;border-radius:6px;background:var(--accent);color:#fff;font-size:11px;
-  font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+.upload-box.add { color: var(--muted); font-size: 20px; }
+.upload-box img { width: 100%; height: 100%; object-fit: cover; }
+.upload-box .rm {
+  position: absolute; top: 2px; right: 2px; width: 16px; height: 16px;
+  background: rgba(0,0,0,.7); border-radius: 50%; color: #fff;
+  font-size: 9px; display: flex; align-items: center; justify-content: center;
 }
-.sceneRow .thumbs{display:flex;gap:2px;flex-shrink:0;}
-.sceneRow .thumb{width:24px;height:24px;border-radius:5px;object-fit:cover;background:#000;}
-.sceneRow .info{flex:1;min-width:0;}
-.sceneRow .cap{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.sceneRow .meta{font-size:10px;color:var(--muted);}
-.sceneRow .delBtn{
-  width:26px;height:26px;border-radius:7px;background:rgba(255,93,93,0.12);color:var(--warn);
-  font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+.upload-box .idx {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(0,0,0,.6); color: #fff; font-size: 8px; text-align: center; padding: 1px 0;
+}
+input[type=file] { display: none; }
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.btn-row { display: flex; gap: 7px; margin-top: 4px; }
+button { font-family: inherit; border: none; border-radius: 9px; cursor: pointer; font-weight: 700; font-size: 12.5px; padding: 10px 13px; }
+button:disabled { opacity: .32; cursor: not-allowed; }
+.btn-pri   { background: linear-gradient(135deg, var(--accent), #7b5bff); color: #fff; flex: 1; }
+.btn-ghost { background: var(--panel2); color: var(--text); border: 1px solid var(--line); }
+.btn-ok    { background: linear-gradient(135deg, #1e9e6a, var(--green)); color: #06251a; }
+.btn-sm    { padding: 6px 9px; font-size: 11px; border-radius: 7px; }
+
+/* ── Stage ────────────────────────────────────────────────── */
+#stageCard { padding: 0; overflow: hidden; }
+#stageWrap { background: #0a0a10; aspect-ratio: 16/9; width: 100%; position: relative; display: flex; align-items: center; justify-content: center; }
+#stage     { width: 100%; height: 100%; object-fit: contain; }
+#stageEmpty{ position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; text-align: center; padding: 18px; }
+
+/* ── Scene list ───────────────────────────────────────────── */
+#sceneList { display: flex; flex-direction: column; gap: 7px; }
+.scene-row {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--panel2); border: 1px solid var(--line); border-radius: 9px; padding: 7px 9px;
+}
+.scene-row .num {
+  width: 20px; height: 20px; border-radius: 5px; background: var(--accent);
+  color: #fff; font-size: 10px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.scene-row .thumbs { display: flex; gap: 2px; flex-shrink: 0; }
+.scene-row .thumb  { width: 22px; height: 22px; border-radius: 4px; object-fit: cover; }
+.scene-row .info   { flex: 1; min-width: 0; }
+.scene-row .slabel { font-size: 12px; font-weight: 600; }
+.scene-row .smeta  { font-size: 10px; color: var(--muted); }
+.scene-row .del {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: rgba(255,93,93,.1); color: var(--red);
+  font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 
-#status{font-size:12px;color:var(--accent2);font-weight:600;text-align:center;min-height:16px;}
+/* ── Status ───────────────────────────────────────────────── */
+#status { font-size: 11.5px; color: var(--green); font-weight: 600; text-align: center; min-height: 15px; }
 
-#overlay{
-  position:fixed;inset:0;background:rgba(8,8,14,0.92);display:none;align-items:center;
-  justify-content:center;flex-direction:column;gap:14px;z-index:50;padding:20px;text-align:center;
-}
-.spin{width:38px;height:38px;border:3px solid rgba(91,140,255,0.2);border-top:3px solid var(--accent);border-radius:50%;animation:sp 0.8s linear infinite;}
-@keyframes sp{to{transform:rotate(360deg);}}
-#overlayTxt{font-size:13px;color:var(--text);font-weight:600;}
+/* ── Progress bar (shows during sketch pre-build) ────────── */
+#progressWrap { display: none; margin-top: 6px; }
+#progressBar  { height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; }
+#progressFill { height: 100%; background: var(--accent); border-radius: 3px; width: 0%; transition: width .12s; }
+#progressTxt  { font-size: 10px; color: var(--muted); margin-top: 3px; text-align: center; }
 
-#canvaModal{
-  position:fixed;inset:0;background:rgba(8,8,14,0.92);display:none;align-items:center;
-  justify-content:center;z-index:60;padding:20px;
+/* ── Settings modal ───────────────────────────────────────── */
+#settingsModal {
+  position: fixed; inset: 0; background: rgba(8,8,14,.93);
+  display: none; align-items: flex-end; justify-content: center; z-index: 60; padding: 16px;
 }
-#canvaModal .box{
-  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;
-  width:100%;max-width:380px;max-height:80vh;overflow-y:auto;
+#settingsBox {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+  padding: 16px; width: 100%; max-width: 420px; max-height: 85vh; overflow-y: auto;
 }
-#canvaModal h3{font-size:15px;margin-bottom:12px;}
-#canvaModal ol{padding-left:20px;font-size:13px;line-height:1.7;color:var(--text);}
-#canvaModal ol li{margin-bottom:8px;}
-#canvaModal .note{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.5;background:var(--panel2);padding:10px;border-radius:8px;}
+#settingsBox h3 { font-size: 14px; margin-bottom: 14px; }
+.setting-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.setting-row label { flex: 1; font-size: 12px; color: var(--text); }
+.setting-row .val  { font-size: 11px; color: var(--accent); min-width: 32px; text-align: right; font-weight: 700; }
+input[type=range] {
+  flex: 1.5; -webkit-appearance: none; height: 3px; border-radius: 3px;
+  background: var(--line); outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px;
+  border-radius: 50%; background: var(--accent); cursor: pointer;
+}
+.setting-section { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+  letter-spacing: .06em; margin: 14px 0 8px; }
 
-::-webkit-scrollbar{display:none;}
+/* ── Canva modal ──────────────────────────────────────────── */
+#canvaModal {
+  position: fixed; inset: 0; background: rgba(8,8,14,.93);
+  display: none; align-items: center; justify-content: center; z-index: 60; padding: 18px;
+}
+#canvaBox {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  padding: 17px; width: 100%; max-width: 380px; max-height: 82vh; overflow-y: auto;
+}
+#canvaBox h3 { font-size: 14px; margin-bottom: 11px; }
+#canvaBox ol  { padding-left: 18px; font-size: 12.5px; line-height: 1.7; }
+#canvaBox ol li { margin-bottom: 7px; }
+#canvaBox .note { font-size: 11px; color: var(--muted); margin-top: 11px; line-height: 1.5;
+  background: var(--panel2); padding: 9px; border-radius: 8px; }
+
+::-webkit-scrollbar { display: none; }
 </style>
 </head>
 <body>
 
 <div id="topbar">
   <h1>🎬 Explainer Video Maker</h1>
-  <span id="freeTag">100% Free</span>
+  <div style="display:flex;gap:6px;align-items:center">
+    <span class="tag">Free</span>
+    <button id="settingsBtn" onclick="openSettings()">⚙ Settings</button>
+  </div>
 </div>
 
-<div id="scroll"><div id="scroll-inner">
+<div id="scroll"><div id="inner">
+
+  <!-- Scene builder -->
+  <div class="card">
+    <div class="badge">Building Scene <span id="sceneNumLabel">1</span></div>
+    <div class="card-title">Character image (1 per scene)</div>
+    <div class="upload-row" id="charRow"></div>
+    <div class="hint">Upload the character in whatever pose fits this scene.</div>
+  </div>
 
   <div class="card">
-    <span class="badge">Building Scene <span id="sceneNumLabel">1</span></span>
-    <h2>Character image (1 for this scene)</h2>
-    <div class="uploadRow" id="charRow">
-      <label class="uploadBox add"><input type="file" accept="image/*" onchange="setCharImage(event)">+</label>
+    <div class="card-title">Explainer images (1–6 per scene)</div>
+    <div class="upload-row" id="explRow"></div>
+    <div class="hint">Up to 6 — arranged in a grid, each sketch-drawn one at a time. The top-left area is left blank for your Canva text.</div>
+  </div>
+
+  <div class="card">
+    <button class="btn-pri" id="addBtn" onclick="addScene()" style="width:100%">➕ Add Scene</button>
+    <div id="status" style="margin-top:9px;">Add a character image and at least one explainer image.</div>
+    <div id="progressWrap">
+      <div id="progressBar"><div id="progressFill"></div></div>
+      <div id="progressTxt">Analysing image…</div>
     </div>
-    <div class="hint">Upload the constant character in whatever pose fits this scene's moment.</div>
   </div>
 
-  <div class="card">
-    <h2>Explainer images (1–6 for this scene)</h2>
-    <div class="uploadRow" id="explRow">
-      <label class="uploadBox add"><input type="file" accept="image/*" multiple onchange="addExplImages(event)">+</label>
-    </div>
-    <div class="hint">Upload up to 6. They'll auto-arrange in a grid and sketch-draw in one at a time during playback. Add your own captions later in Canva — the top-left area is left blank for that.</div>
-  </div>
-
-  <div class="card">
-    <button class="btn-primary" id="addSceneBtn" onclick="addScene()" style="width:100%">➕ Add Scene</button>
-    <div id="status" style="margin-top:10px;">Add a character image and at least one explainer image to continue.</div>
-  </div>
-
+  <!-- Built scenes -->
   <div class="card" id="sceneCard" style="display:none">
-    <h2>Scenes built so far</h2>
+    <div class="card-title">Scenes</div>
     <div id="sceneList"></div>
   </div>
 
+  <!-- Preview -->
   <div class="card" id="stageCard" style="display:none">
     <div id="stageWrap">
       <canvas id="stage"></canvas>
@@ -180,779 +207,1186 @@ button:disabled{opacity:0.35;cursor:not-allowed;}
     </div>
   </div>
 
+  <!-- Controls -->
   <div class="card" id="ctrlCard" style="display:none">
-    <div class="btnRow">
-      <button class="btn-primary" id="playBtn" onclick="playVideo()" disabled>▶ Play</button>
-      <button class="btn-success" id="saveBtn" onclick="downloadVideo()" disabled>⬇ Save Video</button>
+    <div class="btn-row">
+      <button class="btn-pri" id="playBtn" onclick="playVideo()" disabled>▶ Play</button>
+      <button class="btn-ok"  id="saveBtn" onclick="downloadVideo()" disabled>⬇ Save</button>
     </div>
-    <div class="btnRow">
-      <button class="btn-ghost" onclick="openCanvaModal()" style="flex:1">🎨 Edit in Canva — how to</button>
-    </div>
-    <div class="btnRow">
-      <button class="btn-ghost" id="resetBtn" onclick="resetAll()" style="flex:1">↺ Reset Everything</button>
+    <div class="btn-row">
+      <button class="btn-ghost" onclick="openCanva()" style="flex:1">🎨 Edit in Canva</button>
+      <button class="btn-ghost" onclick="resetAll()" style="flex:1">↺ Reset</button>
     </div>
   </div>
 
 </div></div>
 
-<div id="overlay">
-  <div class="spin"></div>
-  <div id="overlayTxt">Working…</div>
+<!-- Settings modal -->
+<div id="settingsModal">
+  <div id="settingsBox">
+    <h3>⚙ Drawing Settings</h3>
+
+    <div class="setting-section">Stroke</div>
+    <div class="setting-row">
+      <label>Stroke thickness</label>
+      <input type="range" id="sThick" min="0.5" max="5" step="0.1" value="2.2" oninput="syncSetting(this,'sThickVal')">
+      <span class="val" id="sThickVal">2.2</span>
+    </div>
+    <div class="setting-row">
+      <label>Pressure variation</label>
+      <input type="range" id="sPressure" min="0" max="1" step="0.05" value="0.45" oninput="syncSetting(this,'sPressureVal')">
+      <span class="val" id="sPressureVal">0.45</span>
+    </div>
+    <div class="setting-row">
+      <label>Line wobble</label>
+      <input type="range" id="sWobble" min="0" max="2" step="0.1" value="0.6" oninput="syncSetting(this,'sWobbleVal')">
+      <span class="val" id="sWobbleVal">0.6</span>
+    </div>
+
+    <div class="setting-section">Timing</div>
+    <div class="setting-row">
+      <label>Draw speed (sec / image)</label>
+      <input type="range" id="sSpeed" min="1" max="8" step="0.5" value="3.5" oninput="syncSetting(this,'sSpeedVal')">
+      <span class="val" id="sSpeedVal">3.5</span>
+    </div>
+    <div class="setting-row">
+      <label>Pause between strokes</label>
+      <input type="range" id="sPause" min="0" max="0.08" step="0.005" value="0.02" oninput="syncSetting(this,'sPauseVal')">
+      <span class="val" id="sPauseVal">0.02</span>
+    </div>
+    <div class="setting-row">
+      <label>Hold time after scene (sec)</label>
+      <input type="range" id="sHold" min="0.5" max="3" step="0.1" value="1.2" oninput="syncSetting(this,'sHoldVal')">
+      <span class="val" id="sHoldVal">1.2</span>
+    </div>
+
+    <div class="setting-section">Quality</div>
+    <div class="setting-row">
+      <label>Edge sensitivity (lower = more)</label>
+      <input type="range" id="sEdge" min="20" max="120" step="5" value="55" oninput="syncSetting(this,'sEdgeVal')">
+      <span class="val" id="sEdgeVal">55</span>
+    </div>
+    <div class="setting-row">
+      <label>Pencil texture</label>
+      <input type="range" id="sTexture" min="0" max="1" step="0.05" value="0.35" oninput="syncSetting(this,'sTextureVal')">
+      <span class="val" id="sTextureVal">0.35</span>
+    </div>
+
+    <div class="btn-row" style="margin-top:14px;">
+      <button class="btn-ghost" onclick="resetSettings()" style="flex:1">Reset defaults</button>
+      <button class="btn-pri"   onclick="closeSettings()" style="flex:1">Done</button>
+    </div>
+  </div>
 </div>
 
+<!-- Canva modal -->
 <div id="canvaModal">
-  <div class="box">
-    <h3>🎨 Bring this video into Canva</h3>
+  <div id="canvaBox">
+    <h3>🎨 Bring this into Canva</h3>
     <ol>
-      <li>Tap <strong>Save Video</strong> in the app first — this downloads a <code>.webm</code> file to your phone.</li>
-      <li>If Canva has trouble opening <code>.webm</code> on your device, save the video to your phone's gallery first — most phones auto-convert it to <code>.mp4</code> when you do this, which Canva always accepts.</li>
-      <li>Open the Canva app → <strong>Create a design</strong> → pick any video template or a blank video.</li>
-      <li>Tap <strong>Uploads</strong> → <strong>Upload media</strong> → select your saved video file.</li>
-      <li>Drag it onto your timeline at the bottom of the screen.</li>
+      <li>Tap <strong>Save</strong> — downloads a <code>.webm</code> file.</li>
+      <li>Save the file to your phone's gallery (most phones auto-convert to <code>.mp4</code>).</li>
+      <li>Open Canva → <strong>Create a design</strong> → blank video.</li>
+      <li>Tap <strong>Uploads → Upload media</strong> → select your saved video.</li>
+      <li>Drag onto the timeline, then add text, music, transitions.</li>
     </ol>
-    <p style="font-size:13px;margin-top:10px;">Once it's on Canva's timeline, you have full control:</p>
-    <ol>
-      <li>Split it into pieces (tap the clip → <strong>Split</strong>) to edit individual scenes.</li>
-      <li>Trim the start/end of any piece by dragging its edges.</li>
-      <li>Add your own text, stickers, music, or transitions on top.</li>
-      <li>Reorder pieces by dragging them on the timeline.</li>
-    </ol>
-    <div class="note">Canva won't know which clip was "scene 3" from your script — it just sees plain video.</div>
-    <div class="btnRow" style="margin-top:14px;">
-      <button class="btn-primary" onclick="closeCanvaModal()" style="width:100%">Got it</button>
+    <div class="note">The top-left of each scene is left blank so you can overlay your own text in Canva.</div>
+    <div class="btn-row" style="margin-top:13px;">
+      <button class="btn-pri" onclick="closeCanva()" style="width:100%">Got it</button>
     </div>
   </div>
 </div>
 
 <script>
-/* ============================================================
-   CANVAS — 16:9 landscape
-   ============================================================ */
+'use strict';
+
+/* ════════════════════════════════════════════════════════════
+   MODULE 1 — CONFIGURATION
+   Central settings object. All tuneable parameters live here.
+   ════════════════════════════════════════════════════════════ */
+const CFG = {
+  // Stroke appearance
+  strokeThick:    2.2,   // base line width in px (at working resolution)
+  pressureVar:    0.45,  // how much pressure varies (0 = none, 1 = max)
+  wobble:         0.6,   // hand wobble amplitude in px
+  pencilTexture:  0.35,  // 0 = smooth, 1 = heavy grain
+
+  // Timing (seconds)
+  secPerImage:    3.5,   // total sketch time per explainer image
+  pauseBetween:   0.02,  // fraction of secPerImage used as inter-stroke pauses
+  holdSec:        1.2,   // how long to hold a completed scene before moving on
+
+  // Detection
+  edgeThreshold:  55,    // Canny high threshold (lower = more edges detected)
+
+  // Layout (fixed — not exposed in settings)
+  textZoneH:      180,   // blank px at top-left for Canva text
+  zonePad:        22,    // inner padding in each zone
+  gridGutter:     16,    // px between grid cells
+  workRes:        600,   // edge-detection working resolution (longer side)
+};
+
+
+/* ════════════════════════════════════════════════════════════
+   MODULE 2 — CANVAS SETUP & LAYOUT
+   All layout zones computed once from canvas dimensions.
+   ════════════════════════════════════════════════════════════ */
 const CW = 1280, CH = 720;
 const canvas = document.getElementById('stage');
-const ctx = canvas.getContext('2d');
+const ctx    = canvas.getContext('2d', { alpha: false });
 canvas.width = CW; canvas.height = CH;
 
-/* ============================================================
-   LAYOUT ZONES
-   ============================================================
-   Bottom caption band reserved first, then remaining height
-   split 40% left (character) / 60% right (explainer grid).
-*/
-// Top-left strip is left blank — reserved for the person to add their own
-// text/caption later in Canva. The app draws nothing there.
-const TEXT_ZONE_H = 180;
-const LEFT_W = Math.round(CW*0.4);
-const RIGHT_W = CW - LEFT_W;
+// Layout zones
+const LEFT_W     = Math.round(CW * 0.4);
+const RIGHT_X    = LEFT_W;
+const RIGHT_W    = CW - LEFT_W;
+const TEXT_ZONE  = { x: 0,      y: 0,            w: LEFT_W,  h: CFG.textZoneH };
+const CHAR_ZONE  = { x: 0,      y: CFG.textZoneH, w: LEFT_W,  h: CH - CFG.textZoneH };
+const EXPL_ZONE  = { x: RIGHT_X, y: 0,            w: RIGHT_W, h: CH };
 
-const TEXT_ZONE = { x: 0, y: 0, w: LEFT_W, h: TEXT_ZONE_H };
-const LEFT_ZONE = { x: 0, y: TEXT_ZONE_H, w: LEFT_W, h: CH - TEXT_ZONE_H };
-const RIGHT_ZONE = { x: LEFT_W, y: 0, w: RIGHT_W, h: CH };
-const ZONE_PAD = 24;
-const GRID_GUTTER = 18;
 
-/* ============================================================
-   STATE
-   ============================================================ */
-let scenes = [];
+/* ════════════════════════════════════════════════════════════
+   MODULE 3 — MATH & GEOMETRY HELPERS
+   ════════════════════════════════════════════════════════════ */
+
+/** Smoothstep easing: slow-fast-slow, C1 continuous */
+function smoothstep(t) { return t * t * (3 - 2 * t); }
+
+/** Ease-in-out cubic */
+function easeInOut(t) { return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2; }
+
+/** Seeded pseudo-random generator (Mulberry32).
+ *  Returns a function that yields consistent values for the same seed.
+ *  Crucial for stable wobble — must look the same on every redraw. */
+function makeRng(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s += 0x6D2B79F5;
+    let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t ^= t + Math.imul(t ^ t >>> 7, 61 | t);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+/** Fit an image inside a box, centred, preserving aspect ratio.
+ *  Returns {x, y, w, h} in canvas space. */
+function fitBox(imgW, imgH, box, pad = 0) {
+  const bw = box.w - pad * 2, bh = box.h - pad * 2;
+  const scale = Math.min(bw / imgW, bh / imgH);
+  const w = imgW * scale, h = imgH * scale;
+  return {
+    x: box.x + pad + (bw - w) / 2,
+    y: box.y + pad + (bh - h) / 2,
+    w, h
+  };
+}
+
+/** Compute grid cell rectangles for 1-6 images in the right zone. */
+function gridCells(n, zone, gutter) {
+  const { x, y, w, h } = zone;
+  const cells = [];
+  if (n === 1) {
+    cells.push({ x, y, w, h });
+  } else if (n === 2) {
+    const cw = (w - gutter) / 2;
+    cells.push({ x,           y, w: cw, h });
+    cells.push({ x: x+cw+gutter, y, w: cw, h });
+  } else if (n === 3) {
+    const cw = (w - gutter * 2) / 3;
+    for (let i = 0; i < 3; i++)
+      cells.push({ x: x + i*(cw+gutter), y, w: cw, h });
+  } else if (n === 4) {
+    const cw = (w - gutter) / 2, ch = (h - gutter) / 2;
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 2; c++)
+      cells.push({ x: x+c*(cw+gutter), y: y+r*(ch+gutter), w: cw, h: ch });
+  } else if (n === 5) {
+    const ch = (h - gutter) / 2;
+    const cwT = (w - gutter * 2) / 3, cwB = (w - gutter) / 2;
+    for (let i = 0; i < 3; i++) cells.push({ x: x+i*(cwT+gutter), y,          w: cwT, h: ch });
+    for (let i = 0; i < 2; i++) cells.push({ x: x+i*(cwB+gutter), y: y+ch+gutter, w: cwB, h: ch });
+  } else {
+    const cw = (w - gutter * 2) / 3, ch = (h - gutter) / 2;
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++)
+      cells.push({ x: x+c*(cw+gutter), y: y+r*(ch+gutter), w: cw, h: ch });
+  }
+  return cells;
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   MODULE 4 — PENCIL TEXTURE ENGINE
+   Generates a reusable grain texture on an offscreen canvas.
+   Composited at low opacity over strokes to add paper feel.
+   ════════════════════════════════════════════════════════════ */
+let _grainCanvas = null;
+
+function buildGrainTexture(w, h) {
+  if (_grainCanvas && _grainCanvas.width === w && _grainCanvas.height === h)
+    return _grainCanvas;
+  const gc = document.createElement('canvas');
+  gc.width = w; gc.height = h;
+  const gctx = gc.getContext('2d');
+  const img = gctx.createImageData(w, h);
+  const rng = makeRng(0xc0ffee);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const g = (rng() * 60) | 0;
+    img.data[i]   = img.data[i+1] = img.data[i+2] = g;
+    img.data[i+3] = (rng() * 40) | 0; // very sparse
+  }
+  gctx.putImageData(img, 0, 0);
+  _grainCanvas = gc;
+  return gc;
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   MODULE 5 — IMAGE ANALYSIS & EDGE DETECTION
+   Canny-style pipeline:
+     1. Grayscale conversion
+     2. 5×5 Gaussian blur (reduces noise before edge detection)
+     3. Sobel gradient magnitude + angle
+     4. Non-maximum suppression (thin edges to 1 pixel)
+     5. Hysteresis thresholding (double threshold — keeps only
+        edges that are either strong, or weak but connected to strong)
+   Returns edge map + gradient data at working resolution.
+   ════════════════════════════════════════════════════════════ */
+
+/** Full Canny edge detection pipeline.
+ *  @param {HTMLImageElement} image
+ *  @param {number} workRes  - length of the longer side at working resolution
+ *  @returns {{ edge, mag, ang, W, H }}
+ */
+function detectEdges(image, workRes) {
+  // Scale to working resolution (longer side = workRes)
+  const aspect = image.height / image.width;
+  const W = image.width >= image.height ? workRes : Math.round(workRes / aspect);
+  const H = image.width >= image.height ? Math.round(workRes * aspect) : workRes;
+
+  const off = document.createElement('canvas');
+  off.width = W; off.height = H;
+  const oc = off.getContext('2d', { willReadFrequently: true });
+  oc.drawImage(image, 0, 0, W, H);
+  const px = oc.getImageData(0, 0, W, H).data;
+
+  // Step 1: Grayscale (perceptual luminance weights)
+  const gray = new Float32Array(W * H);
+  for (let i = 0; i < W * H; i++)
+    gray[i] = 0.299 * px[i*4] + 0.587 * px[i*4+1] + 0.114 * px[i*4+2];
+
+  // Step 2: 5×5 Gaussian blur kernel (σ≈1.4)
+  const K5 = [2,4,5,4,2, 4,9,12,9,4, 5,12,15,12,5, 4,9,12,9,4, 2,4,5,4,2];
+  const K5S = 159;
+  const blurred = new Float32Array(W * H);
+  for (let y = 2; y < H-2; y++) {
+    for (let x = 2; x < W-2; x++) {
+      let v = 0, k = 0;
+      for (let dy = -2; dy <= 2; dy++)
+        for (let dx = -2; dx <= 2; dx++)
+          v += gray[(y+dy)*W + (x+dx)] * K5[k++];
+      blurred[y*W + x] = v / K5S;
+    }
+  }
+
+  // Step 3: Sobel gradient
+  const KX = [-1,0,1, -2,0,2, -1,0,1];
+  const KY = [-1,-2,-1, 0,0,0, 1,2,1];
+  const mag = new Float32Array(W * H);
+  const ang = new Float32Array(W * H);
+  for (let y = 1; y < H-1; y++) {
+    for (let x = 1; x < W-1; x++) {
+      let sx = 0, sy = 0, k = 0;
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++) {
+          const v = blurred[(y+dy)*W + (x+dx)];
+          sx += v * KX[k]; sy += v * KY[k]; k++;
+        }
+      mag[y*W+x] = Math.sqrt(sx*sx + sy*sy);
+      ang[y*W+x] = Math.atan2(sy, sx);
+    }
+  }
+
+  // Step 4: Non-maximum suppression — thin edges to 1 px
+  const nms = new Uint8Array(W * H);
+  const HI = CFG.edgeThreshold, LO = HI * 0.4;
+  for (let y = 1; y < H-1; y++) {
+    for (let x = 1; x < W-1; x++) {
+      const m = mag[y*W+x]; if (m < LO) continue;
+      // Quantise gradient angle to 4 directions
+      const a = ((ang[y*W+x] * 180 / Math.PI) % 180 + 180) % 180;
+      let m1, m2;
+      if      (a < 22.5 || a >= 157.5) { m1 = mag[y*W+x-1];       m2 = mag[y*W+x+1]; }
+      else if (a < 67.5)               { m1 = mag[(y-1)*W+x+1];   m2 = mag[(y+1)*W+x-1]; }
+      else if (a < 112.5)              { m1 = mag[(y-1)*W+x];      m2 = mag[(y+1)*W+x]; }
+      else                             { m1 = mag[(y-1)*W+x-1];    m2 = mag[(y+1)*W+x+1]; }
+      if (m >= m1 && m >= m2) nms[y*W+x] = m >= HI ? 2 : 1; // 2=strong, 1=weak
+    }
+  }
+
+  // Step 5: Hysteresis — keep weak edges only if adjacent to a strong edge
+  const edge = new Uint8Array(W * H);
+  for (let y = 1; y < H-1; y++) {
+    for (let x = 1; x < W-1; x++) {
+      if (nms[y*W+x] === 2) { edge[y*W+x] = 1; continue; }
+      if (nms[y*W+x] !== 1) continue;
+      // Check 8-neighbours for strong edge
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++)
+          if (nms[(y+dy)*W + (x+dx)] === 2) { edge[y*W+x] = 1; break; }
+    }
+  }
+
+  return { edge, mag, ang, W, H };
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   MODULE 6 — STROKE EXTRACTION
+   Converts the edge bitmap into a list of polyline strokes,
+   each representing one continuous pencil path.
+
+   Algorithm:
+   - Sort edge pixels by gradient magnitude (strongest first)
+   - For each unvisited pixel, walk a greedy chain:
+       at each step, prefer pixels that continue in the same
+       direction (dot-product with previous step) AND have
+       high gradient magnitude
+   - Maximum chain length: 500 pixels (long sweeping strokes)
+   - Minimum chain length: 4 pixels (discard noise)
+   ════════════════════════════════════════════════════════════ */
+
+function extractStrokes(edge, mag, ang, W, H) {
+  const visited = new Uint8Array(W * H);
+  const strokes = [];
+
+  // Build seed list sorted strongest-first
+  const seeds = [];
+  for (let y = 1; y < H-1; y++)
+    for (let x = 1; x < W-1; x++)
+      if (edge[y*W+x]) seeds.push(y*W+x);
+  seeds.sort((a, b) => mag[b] - mag[a]);
+
+  for (const startIdx of seeds) {
+    if (visited[startIdx]) continue;
+    const sx = startIdx % W, sy = (startIdx / W) | 0;
+    const pts = [[sx, sy]];
+    visited[startIdx] = 1;
+    let cx = sx, cy = sy, pdx = 0, pdy = 0;
+
+    for (let step = 0; step < 500; step++) {
+      let bestScore = -Infinity, bx = -1, by = -1;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          if (!dx && !dy) continue;
+          const nx = cx + dx, ny = cy + dy;
+          if (nx < 1 || ny < 1 || nx >= W-1 || ny >= H-1) continue;
+          const ni = ny * W + nx;
+          if (!edge[ni] || visited[ni]) continue;
+          // Direction continuity (keeps strokes from zig-zagging)
+          const dot = pdx * dx + pdy * dy;
+          const score = dot * 4 + mag[ni] / 100;
+          if (score > bestScore) { bestScore = score; bx = nx; by = ny; }
+        }
+      }
+      if (bx === -1) break;
+      visited[by * W + bx] = 1;
+      pts.push([bx, by]);
+      pdx = bx - cx; pdy = by - cy;
+      cx = bx; cy = by;
+    }
+
+    if (pts.length >= 4) strokes.push(pts);
+  }
+
+  return strokes;
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   MODULE 7 — ARTIST ORDERING
+   Reorders strokes to follow how a human artist sketches:
+
+   Pass 1 — OUTLINES  (long strokes, length > 80 pts)
+             These are the main contour lines drawn first.
+   Pass 2 — SHAPES    (medium strokes, 25–80 pts)
+             Secondary forms, facial features, main details.
+   Pass 3 — DETAILS   (short strokes, 8–24 pts)
+             Texture, hatching, fine interior lines.
+   Pass 4 — MICRO     (very short, < 8 pts)
+             Final tiny detail touches.
+
+   Within each pass: sorted longest-first (confident first).
+   ════════════════════════════════════════════════════════════ */
+function orderArtistically(strokes) {
+  const passes = [
+    strokes.filter(s => s.length > 80) .sort((a, b) => b.length - a.length),
+    strokes.filter(s => s.length >= 25 && s.length <= 80).sort((a, b) => b.length - a.length),
+    strokes.filter(s => s.length >= 8  && s.length < 25) .sort((a, b) => b.length - a.length),
+    strokes.filter(s => s.length < 8)  .sort((a, b) => b.length - a.length),
+  ];
+  return passes.flat();
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   MODULE 8 — STROKE ENRICHMENT
+   Adds natural drawing properties to each ordered stroke:
+
+   - pressure: base thickness multiplier (varies by stroke type)
+   - alpha: opacity (outlines more opaque, details lighter)
+   - wobbleSeed: unique seed for deterministic hand wobble
+   - isOutline / isMed: flags for rendering decisions
+   - tStart / tEnd: normalised time slot [0..1] in the animation
+
+   Inter-stroke pauses (pen-lift moments) are baked into the
+   time allocation — pauseFrac of each slot is "dead time".
+   ════════════════════════════════════════════════════════════ */
+function enrichStrokes(ordered) {
+  const total  = ordered.reduce((a, s) => a + s.length, 0) || 1;
+  const pauseF = Math.min(CFG.pauseBetween, 0.08);
+  const rng    = makeRng(0x1337CAFE);
+
+  let tCursor = 0;
+  return ordered.map((pts, i) => {
+    const len      = pts.length;
+    const isOutline = len > 80;
+    const isMed     = len >= 25 && len <= 80;
+
+    // Pressure: outlines get confident thick strokes, details get lighter touch
+    const baseThick = CFG.strokeThick;
+    const pMult = isOutline
+      ? 1.0 + rng() * CFG.pressureVar * 0.5
+      : isMed
+        ? 0.80 + rng() * CFG.pressureVar * 0.4
+        : 0.55 + rng() * CFG.pressureVar * 0.3;
+    const pressure = baseThick * pMult;
+
+    // Alpha: main lines fully opaque, micro details slightly transparent
+    const alpha = isOutline ? 0.92 : isMed ? 0.82 : 0.68;
+
+    // Time slot: proportional to stroke length, with a pause gap at start
+    const strokeFrac = len / total;
+    const pauseSlot  = strokeFrac * pauseF;
+    const drawSlot   = strokeFrac * (1 - pauseF);
+
+    const tStart = tCursor + pauseSlot; // drawing begins after the pause
+    const tEnd   = tCursor + pauseSlot + drawSlot;
+    tCursor += strokeFrac;
+
+    return {
+      pts,
+      pressure,
+      alpha,
+      wobbleSeed: (i * 1664525 + 1013904223) >>> 0,
+      isOutline,
+      isMed,
+      tStart,
+      tEnd
+    };
+  });
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   MODULE 9 — STROKE RENDERING
+   Renders a single enriched stroke to a canvas context.
+
+   Uses Catmull-Rom spline interpolation for smooth curves
+   instead of raw lineTo() chains (which produce jagged edges).
+
+   Catmull-Rom: passes through all control points with C1
+   continuity — the tangent at each point blends naturally
+   from its neighbours, producing fluid curve shapes.
+
+   Hand wobble: small per-point noise added from a seeded RNG
+   so the wobble is visually identical on every frame redraw.
+   ════════════════════════════════════════════════════════════ */
+
+/**
+ * Draw a Catmull-Rom spline through pts onto context oc.
+ * alpha controls curve tension (0.5 = centripetal, avoids cusps).
+ */
+function strokeCatmullRom(oc, pts, wobble, rng) {
+  if (pts.length < 2) return;
+  oc.beginPath();
+  // Apply wobble and compute spline control points
+  const wPts = pts.map(([x, y]) => [
+    x + (rng() - 0.5) * wobble,
+    y + (rng() - 0.5) * wobble
+  ]);
+
+  oc.moveTo(wPts[0][0], wPts[0][1]);
+
+  for (let i = 0; i < wPts.length - 1; i++) {
+    const p0 = wPts[Math.max(0, i - 1)];
+    const p1 = wPts[i];
+    const p2 = wPts[i + 1];
+    const p3 = wPts[Math.min(wPts.length - 1, i + 2)];
+
+    // Catmull-Rom → Bezier conversion (centripetal, tension=0.5)
+    const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+
+    oc.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2[0], p2[1]);
+  }
+  oc.stroke();
+}
+
+/**
+ * Draw a partial stroke (for animation progress).
+ * `t` ∈ [0..1] — what fraction of this stroke has been drawn so far.
+ * Uses easeInOut within the stroke for natural acceleration.
+ */
+function strokePartial(oc, enriched, t, scale, ox, oy) {
+  const { pts, pressure, alpha, wobbleSeed, isOutline } = enriched;
+  const rng = makeRng(wobbleSeed);
+
+  // Ease within the stroke — hand accelerates then decelerates
+  const eased = easeInOut(Math.min(1, t));
+  const take  = Math.max(2, Math.floor(pts.length * eased));
+  const sub   = pts.slice(0, take);
+
+  // Scale from working-res coords to output canvas coords
+  const scaled = sub.map(([x, y]) => [x * scale[0] + ox, y * scale[1] + oy]);
+
+  oc.save();
+  oc.globalAlpha  = alpha;
+  oc.strokeStyle  = '#1c1c2e';
+  oc.lineWidth    = pressure;
+  oc.lineCap      = 'round';
+  oc.lineJoin     = 'round';
+
+  strokeCatmullRom(oc, scaled, CFG.wobble * (isOutline ? 1.2 : 0.6), rng);
+
+  // Faint reinforcing second pass on main outlines (artist traces over key lines)
+  if (isOutline && t >= 0.95) {
+    const rng2 = makeRng(wobbleSeed ^ 0xDEAD);
+    oc.globalAlpha = alpha * 0.18;
+    oc.lineWidth   = pressure * 0.55;
+    const half = scaled.slice(0, Math.floor(scaled.length * 0.65));
+    strokeCatmullRom(oc, half, CFG.wobble * 1.8, rng2);
+  }
+
+  oc.restore();
+  return scaled[scaled.length - 1]; // return pen tip position
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   MODULE 10 — SKETCH DATA BUILDER
+   High-level pipeline that runs once per image:
+     1. detectEdges  → clean edge map
+     2. extractStrokes → ordered polylines
+     3. orderArtistically → artist pass order
+     4. enrichStrokes → timing + rendering properties
+
+   Results are cached per scene/image slot and reused for
+   every animation frame — no per-frame image processing.
+   ════════════════════════════════════════════════════════════ */
+
+/**
+ * @param {HTMLImageElement} image
+ * @param {{ w, h }} outputSize  — actual px on the output canvas
+ * @param {function} onProgress  — called with 0..1 during build
+ * @returns {Promise<{strokes, scaleX, scaleY, ox, oy}>}
+ */
+async function buildSketchData(image, outputSize, onProgress) {
+  // Yield to the browser between steps so the UI stays responsive
+  const tick = () => new Promise(r => setTimeout(r, 0));
+
+  onProgress(0.05); await tick();
+  const { edge, mag, ang, W, H } = detectEdges(image, CFG.workRes);
+
+  onProgress(0.35); await tick();
+  const raw = extractStrokes(edge, mag, ang, W, H);
+
+  onProgress(0.60); await tick();
+  const ordered = orderArtistically(raw);
+
+  onProgress(0.80); await tick();
+  const enriched = enrichStrokes(ordered);
+
+  onProgress(1.0);
+
+  // Compute scale factors from working-res to output canvas coords
+  const scaleX = outputSize.w / W;
+  const scaleY = outputSize.h / H;
+
+  return {
+    strokes: enriched,
+    scale:   [scaleX, scaleY],
+    ox:      outputSize.x,
+    oy:      outputSize.y,
+  };
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   MODULE 11 — FRAME RENDERER
+   Draws one complete animation frame to the main canvas.
+   Called 60× per second during playback.
+
+   Per frame cost:
+   - drawBG: O(1) — fillRect
+   - character: O(1) — drawImage
+   - for each expl image:
+       completed images: O(1) — drawImage from cache
+       active image: O(S) — iterate strokes up to current time
+   Total is O(S_active) which stays fast even with 1000+ strokes.
+   ════════════════════════════════════════════════════════════ */
+
+function drawBackground() {
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, CW, CH);
+}
+
+function drawCharacterImage(entry) {
+  if (!entry) return;
+  const r = fitBox(entry.img.width, entry.img.height, CHAR_ZONE, CFG.zonePad);
+  ctx.drawImage(entry.img, r.x, r.y, r.w, r.h);
+}
+
+/**
+ * Render one explainer image at a given animation progress [0..1].
+ * Returns the current pen-tip position (for hand animation), or null.
+ */
+function drawExplainerSlot(entry, sd, cell, progress) {
+  const r = fitBox(entry.img.width, entry.img.height, cell, CFG.zonePad * 0.5);
+  if (!r.w || !r.h) return null;
+
+  if (progress <= 0) return null;
+
+  if (progress >= 1) {
+    // Completed — just blit pre-rendered image, instant
+    ctx.drawImage(entry.img, r.x, r.y, r.w, r.h);
+    return null;
+  }
+
+  // Two-phase progress:
+  //   0.0 → 0.92: drawing animation
+  //   0.92 → 1.0: colour fade-in (image gradually reveals in colour)
+  const drawProgress = Math.min(1, progress / 0.92);
+  const fadeAlpha    = progress > 0.92 ? (progress - 0.92) / 0.08 : 0;
+
+  let penTip = null;
+
+  // Draw all strokes up to current time
+  if (sd) {
+    const { strokes, scale, ox, oy } = sd;
+    for (const s of strokes) {
+      if (s.tStart > drawProgress) break;          // not reached yet
+      if (s.tEnd   <= drawProgress) {
+        // Fully drawn — render at 100% with a fast path
+        strokePartial(ctx, s, 1, scale, ox, oy);
+        continue;
+      }
+      // Partially drawn — this is the "active" stroke
+      const localT = (drawProgress - s.tStart) / (s.tEnd - s.tStart);
+      penTip = strokePartial(ctx, s, localT, scale, ox, oy);
+      break; // nothing after this is drawn yet
+    }
+  }
+
+  // Pencil grain overlay (adds paper texture feel)
+  if (CFG.pencilTexture > 0 && sd) {
+    const grain = buildGrainTexture(Math.ceil(r.w), Math.ceil(r.h));
+    ctx.save();
+    ctx.globalAlpha = CFG.pencilTexture * 0.18 * drawProgress;
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.drawImage(grain, r.x, r.y, r.w, r.h);
+    ctx.restore();
+  }
+
+  // Colour fade-in at end
+  if (fadeAlpha > 0) {
+    ctx.save();
+    ctx.globalAlpha = fadeAlpha;
+    ctx.drawImage(entry.img, r.x, r.y, r.w, r.h);
+    ctx.restore();
+  }
+
+  return penTip;
+}
+
+/**
+ * Draw the hand-and-pencil icon at position (px, py) pointing at angle.
+ * Sized appropriately for a 1280px canvas.
+ */
+function drawHand(px, py, angle) {
+  ctx.save();
+  ctx.translate(px, py);
+  ctx.rotate(angle);
+
+  const S = 1.0; // scale factor — adjust if hand feels too big/small
+
+  // Pencil body (yellow hexagonal shaft)
+  ctx.fillStyle = '#F9C928';
+  ctx.beginPath();
+  ctx.roundRect(-68*S, -8*S, 62*S, 16*S, 3*S);
+  ctx.fill();
+
+  // Pencil logo stripe
+  ctx.fillStyle = '#E8B800';
+  ctx.fillRect(-44*S, -8*S, 7*S, 16*S);
+
+  // Ferrule (silver band between eraser and body)
+  ctx.fillStyle = '#B8B8B8';
+  ctx.beginPath(); ctx.roundRect(-74*S, -7*S, 8*S, 14*S, 2*S); ctx.fill();
+
+  // Eraser (pink)
+  ctx.fillStyle = '#F4A8A8';
+  ctx.beginPath(); ctx.roundRect(-82*S, -6*S, 10*S, 12*S, 2*S); ctx.fill();
+
+  // Wood cone (sharpened section)
+  ctx.fillStyle = '#C8956C';
+  ctx.beginPath();
+  ctx.moveTo(-6*S, -8*S); ctx.lineTo(-6*S, 8*S); ctx.lineTo(4*S, 0);
+  ctx.closePath(); ctx.fill();
+
+  // Graphite tip
+  ctx.fillStyle = '#2a2a2a';
+  ctx.beginPath();
+  ctx.moveTo(1*S, -3*S); ctx.lineTo(1*S, 3*S); ctx.lineTo(10*S, 0);
+  ctx.closePath(); ctx.fill();
+
+  // Hand base (flesh tone)
+  ctx.fillStyle = '#FCCB98';
+  ctx.beginPath();
+  ctx.ellipse(-28*S, 2*S, 36*S, 24*S, 0.15, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#C8956C'; ctx.lineWidth = 2*S; ctx.stroke();
+
+  // Finger highlight lines (knuckles)
+  ctx.strokeStyle = 'rgba(180,120,80,0.55)'; ctx.lineWidth = 1.4*S;
+  [-20*S, -31*S, -40*S].forEach(kx => {
+    ctx.beginPath(); ctx.arc(kx, -11*S, 5.5*S, 0.25, Math.PI - 0.25); ctx.stroke();
+  });
+
+  // Thumb
+  ctx.fillStyle = '#FCCB98';
+  ctx.beginPath(); ctx.ellipse(-14*S, 15*S, 15*S, 9*S, -0.55, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = '#C8956C'; ctx.lineWidth = 1.8*S; ctx.stroke();
+
+  ctx.restore();
+}
+
+/**
+ * Render a complete animation frame.
+ * @param {number} sceneIdx
+ * @param {number} slideX       — horizontal slide-in offset (negative = offscreen left)
+ * @param {number} activeImg    — index of the image currently being drawn
+ * @param {number} imgProgress  — progress [0..1] of the active image
+ */
+function renderFrame(sceneIdx, slideX, activeImg, imgProgress) {
+  drawBackground();
+  if (!scenes.length) return;
+  const sc = scenes[sceneIdx];
+  const cells = gridCells(sc.explImgs.length, {
+    x: EXPL_ZONE.x + CFG.zonePad, y: EXPL_ZONE.y + CFG.zonePad,
+    w: EXPL_ZONE.w - CFG.zonePad * 2, h: EXPL_ZONE.h - CFG.zonePad * 2
+  }, CFG.gridGutter);
+
+  ctx.save();
+  ctx.translate(slideX, 0);
+
+  drawCharacterImage(sc.charImg);
+
+  let penPos  = null;
+  let penAngle = -0.28;
+
+  sc.explImgs.forEach((entry, i) => {
+    const p   = i < activeImg ? 1 : i === activeImg ? imgProgress : 0;
+    const sd  = sc.sketchData ? sc.sketchData[i] : null;
+    const tip = drawExplainerSlot(entry, sd, cells[i], p);
+    if (i === activeImg && tip && p < 0.92) penPos = tip;
+  });
+
+  if (penPos) {
+    // Angle the hand toward the direction the pen is currently moving
+    // (computed from last two positions if available — simplified to fixed angle here)
+    drawHand(penPos[0], penPos[1], penAngle);
+  }
+
+  ctx.restore();
+}
+
+function stillFrame(idx) {
+  const sc = scenes[idx];
+  renderFrame(idx, 0, sc.explImgs.length, 1);
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   MODULE 12 — ANIMATION ENGINE
+   requestAnimationFrame loop with delta-time clamping.
+
+   State machine:
+     slide_in  → character + explainer zone slides in from left
+     preload   → runs buildSketchData for all images in this scene
+                 (shows progress bar, non-blocking via async/await)
+     sketch    → sequential per-image drawing (activeImg 0..N-1)
+     hold      → scene complete, pause before next scene
+   ════════════════════════════════════════════════════════════ */
+
+let isPlaying   = false;
+let rafId       = null;
+let mediaRec    = null;
+let recChunks   = [];
+
+async function preloadSceneSketch(sc, onProgress) {
+  if (sc.sketchData) return; // already built
+  sc.sketchData = [];
+  const n = sc.explImgs.length;
+  const cells = gridCells(n, {
+    x: EXPL_ZONE.x + CFG.zonePad, y: EXPL_ZONE.y + CFG.zonePad,
+    w: EXPL_ZONE.w - CFG.zonePad * 2, h: EXPL_ZONE.h - CFG.zonePad * 2
+  }, CFG.gridGutter);
+
+  for (let i = 0; i < n; i++) {
+    const entry = sc.explImgs[i];
+    const cell  = cells[i];
+    const r     = fitBox(entry.img.width, entry.img.height, cell, CFG.zonePad * 0.5);
+    sc.sketchData[i] = await buildSketchData(entry.img, r, p => {
+      onProgress((i + p) / n);
+    });
+  }
+}
+
+function runAnimation(onDone) {
+  let si        = 0;
+  let phase     = 'preload';
+  let slideX    = -CW;
+  let activeImg = 0;
+  let imgP      = 0;
+  let holdTimer = 0;
+  let last      = null;
+
+  const SLIDE_SPEED = 22; // px per frame at 60fps
+
+  async function kickPreload() {
+    showProgress(true, 'Analysing images…');
+    await preloadSceneSketch(scenes[si], p => updateProgress(p));
+    showProgress(false);
+    phase  = 'slide_in';
+    slideX = -CW;
+  }
+
+  kickPreload();
+
+  function frame(ts) {
+    if (!isPlaying) return;
+    const dt = last ? Math.min(ts - last, 50) : 16;
+    last = ts;
+
+    if (phase === 'preload') {
+      // Just keep the loading screen; preload is async and will flip phase
+      rafId = requestAnimationFrame(frame);
+      return;
+    }
+
+    if (phase === 'slide_in') {
+      slideX = Math.min(0, slideX + SLIDE_SPEED * (dt / 16));
+      renderFrame(si, slideX, 0, 0);
+      if (slideX >= 0) { phase = 'sketch'; activeImg = 0; imgP = 0; }
+    }
+    else if (phase === 'sketch') {
+      const secPerImg = parseFloat(document.getElementById('sSpeed').value);
+      imgP += dt / (secPerImg * 1000);
+      if (imgP >= 1) {
+        imgP = 1;
+        renderFrame(si, 0, activeImg, 1);
+        activeImg++;
+        imgP = 0;
+        if (activeImg >= scenes[si].explImgs.length) {
+          phase = 'hold'; holdTimer = 0;
+        }
+      } else {
+        renderFrame(si, 0, activeImg, imgP);
+      }
+    }
+    else if (phase === 'hold') {
+      const holdSec = parseFloat(document.getElementById('sHold').value);
+      holdTimer += dt;
+      renderFrame(si, 0, scenes[si].explImgs.length, 1);
+      if (holdTimer >= holdSec * 1000) {
+        si++;
+        if (si >= scenes.length) {
+          isPlaying = false;
+          document.getElementById('playBtn').textContent = '▶ Play Again';
+          setStatus('✅ Done!');
+          if (onDone) onDone();
+          return;
+        }
+        phase = 'preload';
+        kickPreload();
+      }
+    }
+
+    rafId = requestAnimationFrame(frame);
+  }
+
+  rafId = requestAnimationFrame(frame);
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   MODULE 13 — EXPORT
+   Captures canvas stream via MediaRecorder → WebM download.
+   ════════════════════════════════════════════════════════════ */
+async function downloadVideo() {
+  if (!scenes.length || isPlaying) return;
+  setStatus('⏺ Recording…');
+  document.getElementById('saveBtn').disabled = true;
+  document.getElementById('playBtn').disabled = true;
+  recChunks = [];
+
+  const stream = canvas.captureStream(60);
+  const mime   = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']
+    .find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
+
+  mediaRec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8_000_000 });
+  mediaRec.ondataavailable = e => { if (e.data.size > 0) recChunks.push(e.data); };
+  mediaRec.onstop = () => {
+    const blob = new Blob(recChunks, { type: mime });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'explainer.webm'; a.click();
+    URL.revokeObjectURL(url);
+    setStatus('✅ Saved! Open in Canva to add text and music.');
+    document.getElementById('saveBtn').disabled = false;
+    document.getElementById('playBtn').disabled = false;
+  };
+
+  mediaRec.start();
+  isPlaying = true;
+  document.getElementById('playBtn').textContent = '⏺ Recording…';
+  runAnimation(() => {
+    if (mediaRec.state !== 'inactive') mediaRec.stop();
+    document.getElementById('playBtn').textContent = '▶ Play Again';
+  });
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   MODULE 14 — APP STATE & UI
+   ════════════════════════════════════════════════════════════ */
+let scenes    = [];
 let draftChar = null;
 let draftExpl = [];
-let isPlaying = false;
-let rafId = null;
-let mediaRecorder = null;
-let recordedChunks = [];
 
-function openCanvaModal(){ document.getElementById('canvaModal').style.display = 'flex'; }
-function closeCanvaModal(){ document.getElementById('canvaModal').style.display = 'none'; }
-
-/* ============================================================
-   IMAGE UPLOAD — per-scene draft
-   ============================================================ */
-function loadImageFile(file, cb){
-  const reader = new FileReader();
-  reader.onload = () => {
-    const dataUrl = reader.result;
-    const img = new Image();
-    img.onload = () => cb({ img, dataUrl });
-    img.src = dataUrl;
-  };
-  reader.readAsDataURL(file);
-}
-
-function setCharImage(event){
-  const file = event.target.files[0];
-  if(!file) return;
-  loadImageFile(file, (entry) => {
-    draftChar = entry;
-    renderCharRow();
-    updateStatus();
+// ── Image loading helper ──────────────────────────────────
+function loadFile(file) {
+  return new Promise(res => {
+    const r = new FileReader();
+    r.onload = () => {
+      const img = new Image();
+      img.onload = () => res({ img, dataUrl: r.result });
+      img.src = r.result;
+    };
+    r.readAsDataURL(file);
   });
-  event.target.value = '';
 }
 
-function addExplImages(event){
-  const files = Array.from(event.target.files || []);
-  const room = 6 - draftExpl.length;
-  files.slice(0, room).forEach(file => {
-    loadImageFile(file, (entry) => {
-      draftExpl.push(entry);
-      renderExplRow();
-      updateStatus();
-    });
+// ── Upload handlers ───────────────────────────────────────
+function setCharImage(e) {
+  const f = e.target.files[0]; if (!f) return;
+  loadFile(f).then(entry => { draftChar = entry; renderCharRow(); updateAddBtn(); });
+  e.target.value = '';
+}
+
+function addExplImages(e) {
+  const files = Array.from(e.target.files || []);
+  const room  = 6 - draftExpl.length;
+  Promise.all(files.slice(0, room).map(loadFile)).then(entries => {
+    draftExpl.push(...entries);
+    renderExplRow(); updateAddBtn();
   });
-  event.target.value = '';
+  e.target.value = '';
 }
 
-function removeExplImage(i){
-  draftExpl.splice(i, 1);
-  renderExplRow();
-  updateStatus();
-}
+function removeChar()     { draftChar = null;        renderCharRow(); updateAddBtn(); }
+function removeExpl(i)    { draftExpl.splice(i, 1);  renderExplRow(); updateAddBtn(); }
 
-function renderCharRow(){
+function renderCharRow() {
   const row = document.getElementById('charRow');
   row.innerHTML = '';
-  if(draftChar){
-    const box = document.createElement('div');
-    box.className = 'uploadBox';
-    box.innerHTML = `<img src="${draftChar.dataUrl}"><div class="rm">✕</div>`;
-    box.querySelector('.rm').onclick = () => { draftChar = null; renderCharRow(); updateStatus(); };
-    row.appendChild(box);
+  if (draftChar) {
+    const b = document.createElement('div');
+    b.className = 'upload-box';
+    b.innerHTML = `<img src="${draftChar.dataUrl}"><div class="rm">✕</div>`;
+    b.querySelector('.rm').onclick = removeChar;
+    row.appendChild(b);
   } else {
-    const addBox = document.createElement('label');
-    addBox.className = 'uploadBox add';
-    addBox.innerHTML = `<input type="file" accept="image/*" onchange="setCharImage(event)">+`;
-    row.appendChild(addBox);
+    row.innerHTML = `<label class="upload-box add"><input type="file" accept="image/*" onchange="setCharImage(event)">+</label>`;
   }
 }
 
-function renderExplRow(){
+function renderExplRow() {
   const row = document.getElementById('explRow');
   row.innerHTML = '';
-  draftExpl.forEach((entry, i) => {
-    const box = document.createElement('div');
-    box.className = 'uploadBox';
-    box.innerHTML = `<img src="${entry.dataUrl}"><div class="idx">${i+1}</div><div class="rm">✕</div>`;
-    box.querySelector('.rm').onclick = (e) => { e.stopPropagation(); removeExplImage(i); };
-    row.appendChild(box);
+  draftExpl.forEach((e, i) => {
+    const b = document.createElement('div');
+    b.className = 'upload-box';
+    b.innerHTML = `<img src="${e.dataUrl}"><div class="idx">${i+1}</div><div class="rm">✕</div>`;
+    b.querySelector('.rm').onclick = ev => { ev.stopPropagation(); removeExpl(i); };
+    row.appendChild(b);
   });
-  if(draftExpl.length < 6){
-    const addBox = document.createElement('label');
-    addBox.className = 'uploadBox add';
-    addBox.innerHTML = `<input type="file" accept="image/*" multiple onchange="addExplImages(event)">+`;
-    row.appendChild(addBox);
+  if (draftExpl.length < 6) {
+    const lb = document.createElement('label');
+    lb.className = 'upload-box add';
+    lb.innerHTML = `<input type="file" accept="image/*" multiple onchange="addExplImages(event)">+`;
+    row.appendChild(lb);
   }
 }
 
-/* ============================================================
-   STATUS
-   ============================================================ */
-function updateStatus(){
-  const s = document.getElementById('status');
-  const btn = document.getElementById('addSceneBtn');
-  if(!draftChar){ s.textContent = 'Add a character image for this scene.'; btn.disabled = true; return; }
-  if(draftExpl.length === 0){ s.textContent = 'Add at least one explainer image (up to 6).'; btn.disabled = true; return; }
-  s.textContent = `Ready to add Scene ${scenes.length+1} with ${draftExpl.length} explainer image${draftExpl.length>1?'s':''}.`;
-  btn.disabled = false;
+function updateAddBtn() {
+  const ok = draftChar && draftExpl.length > 0;
+  document.getElementById('addBtn').disabled = !ok;
+  setStatus(
+    !draftChar             ? 'Add a character image.'
+    : draftExpl.length < 1 ? 'Add at least one explainer image.'
+    :                        `Ready — ${draftExpl.length} image${draftExpl.length > 1 ? 's' : ''} → will add Scene ${scenes.length + 1}.`
+  );
 }
 
-/* ============================================================
-   ADD / DELETE SCENE
-   ============================================================ */
-function addScene(){
-  if(!draftChar || draftExpl.length === 0) return;
-  scenes.push({
-    charImg: draftChar,
-    explImgs: draftExpl.slice(),
-    sketchCache: null
-  });
-
-  draftChar = null;
-  draftExpl = [];
-  renderCharRow();
-  renderExplRow();
-
+// ── Scene management ──────────────────────────────────────
+function addScene() {
+  if (!draftChar || draftExpl.length < 1) return;
+  scenes.push({ charImg: draftChar, explImgs: draftExpl.slice(), sketchData: null });
+  draftChar = null; draftExpl = [];
+  renderCharRow(); renderExplRow();
   document.getElementById('sceneNumLabel').textContent = scenes.length + 1;
   renderSceneList();
-  document.getElementById('sceneCard').style.display = '';
-  document.getElementById('stageCard').style.display = '';
-  document.getElementById('ctrlCard').style.display = '';
+  ['sceneCard','stageCard','ctrlCard'].forEach(id => document.getElementById(id).style.display = '');
   document.getElementById('stageEmpty').style.display = 'none';
   document.getElementById('playBtn').disabled = false;
   document.getElementById('saveBtn').disabled = false;
-  updateStatus();
-  drawStillFrame(scenes.length - 1);
-  setStatusLine(`✅ Scene ${scenes.length} added. Build the next one or press Play.`);
+  updateAddBtn();
+  stillFrame(scenes.length - 1);
+  setStatus(`✅ Scene ${scenes.length} added. Build the next or press Play.`);
 }
 
-function deleteScene(idx){
-  if(!confirm(`Delete scene ${idx+1}?`)) return;
-  scenes.splice(idx, 1);
+function deleteScene(i) {
+  if (!confirm(`Delete scene ${i+1}?`)) return;
+  scenes.splice(i, 1);
   renderSceneList();
-  if(scenes.length === 0){
-    document.getElementById('sceneCard').style.display = 'none';
-    document.getElementById('stageCard').style.display = 'none';
-    document.getElementById('ctrlCard').style.display = 'none';
+  if (!scenes.length) {
+    ['sceneCard','stageCard','ctrlCard'].forEach(id => document.getElementById(id).style.display = 'none');
     document.getElementById('stageEmpty').style.display = 'flex';
     document.getElementById('playBtn').disabled = true;
     document.getElementById('saveBtn').disabled = true;
+    ctx.clearRect(0, 0, CW, CH);
   } else {
-    drawStillFrame(Math.min(idx, scenes.length-1));
+    stillFrame(Math.min(i, scenes.length - 1));
   }
   document.getElementById('sceneNumLabel').textContent = scenes.length + 1;
 }
 
-function renderSceneList(){
+function renderSceneList() {
   const list = document.getElementById('sceneList');
   list.innerHTML = '';
   scenes.forEach((sc, i) => {
     const row = document.createElement('div');
-    row.className = 'sceneRow';
+    row.className = 'scene-row';
     const thumbs = sc.explImgs.slice(0,4).map(e => `<img class="thumb" src="${e.dataUrl}">`).join('');
     row.innerHTML = `
       <div class="num">${i+1}</div>
       <img class="thumb" src="${sc.charImg.dataUrl}">
       <div class="thumbs">${thumbs}</div>
       <div class="info">
-        <div class="cap">Scene ${i+1}</div>
-        <div class="meta">${sc.explImgs.length} explainer image${sc.explImgs.length>1?'s':''}</div>
+        <div class="slabel">Scene ${i+1}</div>
+        <div class="smeta">${sc.explImgs.length} image${sc.explImgs.length > 1 ? 's' : ''}</div>
       </div>
-      <div class="delBtn">✕</div>
-    `;
-    row.querySelector('.delBtn').onclick = () => deleteScene(i);
-    row.onclick = (e) => { if(e.target.closest('.delBtn')) return; drawStillFrame(i); };
+      <div class="del">✕</div>`;
+    row.querySelector('.del').onclick = () => deleteScene(i);
+    row.onclick = e => { if (!e.target.closest('.del')) stillFrame(i); };
     list.appendChild(row);
   });
 }
 
-function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
-
-/* ============================================================
-   GRID LAYOUT
-   ============================================================ */
-function gridCells(n, zoneX, zoneY, zoneW, zoneH, gutter){
-  const cells = [];
-  if(n <= 1){
-    cells.push({x:zoneX, y:zoneY, w:zoneW, h:zoneH});
-  } else if(n === 2){
-    const w = (zoneW - gutter) / 2;
-    cells.push({x:zoneX, y:zoneY, w, h:zoneH});
-    cells.push({x:zoneX+w+gutter, y:zoneY, w, h:zoneH});
-  } else if(n === 3){
-    const w = (zoneW - gutter*2) / 3;
-    for(let i=0;i<3;i++) cells.push({x:zoneX+i*(w+gutter), y:zoneY, w, h:zoneH});
-  } else if(n === 4){
-    const w = (zoneW - gutter)/2, h = (zoneH - gutter)/2;
-    for(let r=0;r<2;r++) for(let c=0;c<2;c++)
-      cells.push({x:zoneX+c*(w+gutter), y:zoneY+r*(h+gutter), w, h});
-  } else if(n === 5){
-    const h = (zoneH - gutter)/2;
-    const wTop = (zoneW - gutter*2)/3;
-    const wBot = (zoneW - gutter)/2;
-    for(let i=0;i<3;i++) cells.push({x:zoneX+i*(wTop+gutter), y:zoneY, w:wTop, h});
-    for(let i=0;i<2;i++) cells.push({x:zoneX+i*(wBot+gutter), y:zoneY+h+gutter, w:wBot, h});
-  } else {
-    const w = (zoneW - gutter*2)/3, h = (zoneH - gutter)/2;
-    for(let r=0;r<2;r++) for(let c=0;c<3;c++)
-      cells.push({x:zoneX+c*(w+gutter), y:zoneY+r*(h+gutter), w, h});
-  }
-  return cells;
-}
-
-function fitInCell(img, cell, innerPad){
-  const ix = cell.x + innerPad, iy = cell.y + innerPad;
-  const iw = cell.w - innerPad*2, ih = cell.h - innerPad*2;
-  const scale = Math.min(iw/img.width, ih/img.height);
-  const w = img.width*scale, h = img.height*scale;
-  const x = ix + (iw-w)/2, y = iy + (ih-h)/2;
-  return {x, y, w, h};
-}
-
-/* ============================================================
-   SKETCH ENGINE — cinematic pre-render + compositing
-   ============================================================
-   Architecture:
-   - All strokes are extracted ONCE and rendered to an offscreen
-     canvas at full output resolution (not a tiny 160px thumbnail).
-   - During animation, we reveal the pre-rendered sketch canvas
-     stroke-by-stroke using a point-budget approach — O(1) per frame.
-   - Stroke ORDER: long outline strokes first, then medium, then fine
-     detail — exactly the order a real artist works.
-   - Each stroke is drawn as a Catmull-Rom spline (smooth curves,
-     not jagged lineTo chains).
-   - Pressure variation and slight wobble applied per stroke.
-   - No reprocessing happens during animation — buttery smooth.
-*/
-
-/* ── helpers ─────────────────────────────────────────── */
-function seededRand(seed){
-  let s = seed|0;
-  return ()=>{ s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; };
-}
-
-// Catmull-Rom spline through pts — draws smooth curves, not jagged lines
-function catmullRomPath(oc, pts, alpha){
-  if(pts.length<2) return;
-  alpha = alpha||0.5;
-  oc.moveTo(pts[0][0], pts[0][1]);
-  for(let i=0;i<pts.length-1;i++){
-    const p0=pts[Math.max(0,i-1)], p1=pts[i], p2=pts[i+1], p3=pts[Math.min(pts.length-1,i+2)];
-    const cp1x=p1[0]+(p2[0]-p0[0])/6*alpha*3;
-    const cp1y=p1[1]+(p2[1]-p0[1])/6*alpha*3;
-    const cp2x=p2[0]-(p3[0]-p1[0])/6*alpha*3;
-    const cp2y=p2[1]-(p3[1]-p1[1])/6*alpha*3;
-    oc.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,p2[0],p2[1]);
-  }
-}
-
-/* ── edge extraction ─────────────────────────────────── */
-function extractEdges(image, W){
-  const H = Math.round(W * image.height / image.width);
-  const off = document.createElement('canvas');
-  off.width=W; off.height=H;
-  const oc = off.getContext('2d');
-  oc.drawImage(image,0,0,W,H);
-  const px = oc.getImageData(0,0,W,H).data;
-
-  // Grayscale + gaussian blur (5×5 for cleaner edges)
-  const gray = new Float32Array(W*H);
-  for(let i=0;i<W*H;i++) gray[i]=0.299*px[i*4]+0.587*px[i*4+1]+0.114*px[i*4+2];
-
-  const blur = new Float32Array(W*H);
-  const gk=[2,4,5,4,2, 4,9,12,9,4, 5,12,15,12,5, 4,9,12,9,4, 2,4,5,4,2];
-  const gks=159;
-  for(let y=2;y<H-2;y++) for(let x=2;x<W-2;x++){
-    let v=0,k=0;
-    for(let dy=-2;dy<=2;dy++) for(let dx=-2;dx<=2;dx++) v+=gray[(y+dy)*W+(x+dx)]*gk[k++];
-    blur[y*W+x]=v/gks;
-  }
-
-  // Sobel
-  const mag=new Float32Array(W*H), ang=new Float32Array(W*H);
-  const kx=[-1,0,1,-2,0,2,-1,0,1], ky=[-1,-2,-1,0,0,0,1,2,1];
-  for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++){
-    let sx=0,sy=0,k=0;
-    for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){
-      const v=blur[(y+dy)*W+(x+dx)]; sx+=v*kx[k]; sy+=v*ky[k]; k++;
-    }
-    mag[y*W+x]=Math.sqrt(sx*sx+sy*sy);
-    ang[y*W+x]=Math.atan2(sy,sx);
-  }
-
-  // Canny-style non-maximum suppression + double threshold
-  const edge=new Uint8Array(W*H);
-  const HI=90, LO=40;
-  for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++){
-    const m=mag[y*W+x]; if(m<LO) continue;
-    const a=((ang[y*W+x]*180/Math.PI)%180+180)%180;
-    let m1,m2;
-    if(a<22.5||a>=157.5){m1=mag[y*W+x-1];m2=mag[y*W+x+1];}
-    else if(a<67.5){m1=mag[(y-1)*W+x+1];m2=mag[(y+1)*W+x-1];}
-    else if(a<112.5){m1=mag[(y-1)*W+x];m2=mag[(y+1)*W+x];}
-    else{m1=mag[(y-1)*W+x-1];m2=mag[(y+1)*W+x+1];}
-    if(m>=m1&&m>=m2&&m>=HI) edge[y*W+x]=2; // strong
-    else if(m>=m1&&m>=m2&&m>=LO) edge[y*W+x]=1; // weak
-  }
-  // Hysteresis: promote weak edges connected to strong ones
-  for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++){
-    if(edge[y*W+x]!==1) continue;
-    let hasStrong=false;
-    for(let dy=-1;dy<=1&&!hasStrong;dy++) for(let dx=-1;dx<=1;dx++) if(edge[(y+dy)*W+(x+dx)]===2){hasStrong=true;break;}
-    if(hasStrong) edge[y*W+x]=2; else edge[y*W+x]=0;
-  }
-  return {edge,mag,W,H};
-}
-
-/* ── stroke walking ──────────────────────────────────── */
-function walkStrokes(edge, mag, W, H){
-  const visited=new Uint8Array(W*H);
-  const strokes=[];
-
-  // Start from strongest edges first so major outlines get longest chains
-  const seeds=[];
-  for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++) if(edge[y*W+x]===2) seeds.push([x,y,mag[y*W+x]]);
-  seeds.sort((a,b)=>b[2]-a[2]);
-
-  for(const [sx,sy] of seeds){
-    if(visited[sy*W+sx]) continue;
-    let cx=sx,cy=sy;
-    const pts=[[cx,cy]]; visited[sy*W+sx]=1;
-    let pdx=0,pdy=0;
-
-    for(let step=0;step<400;step++){
-      let best=-1,bx=0,by=0,bestScore=-Infinity;
-      for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){
-        if(!dx&&!dy) continue;
-        const nx=cx+dx,ny=cy+dy;
-        if(nx<1||ny<1||nx>=W-1||ny>=H-1) continue;
-        const ni=ny*W+nx;
-        if(!edge[ni]||visited[ni]) continue;
-        // direction continuity score + edge strength
-        const dir=pdx*dx+pdy*dy;
-        const score=dir*3+mag[ni]/180;
-        if(score>bestScore){bestScore=score;bx=nx;by=ny;best=ni;}
-      }
-      if(best===-1) break;
-      pdx=bx-cx; pdy=by-cy;
-      visited[best]=1; pts.push([bx,by]); cx=bx; cy=by;
-    }
-    if(pts.length>=4) strokes.push(pts);
-  }
-  return strokes;
-}
-
-/* ── artist ordering ─────────────────────────────────── */
-function orderStrokesNaturally(strokes, W, H){
-  // Three passes: outlines (long) → shapes (medium) → details (short)
-  const long  = strokes.filter(s=>s.length>80).sort((a,b)=>b.length-a.length);
-  const med   = strokes.filter(s=>s.length>=20&&s.length<=80).sort((a,b)=>b.length-a.length);
-  const short = strokes.filter(s=>s.length<20).sort((a,b)=>b.length-a.length);
-  return [...long,...med,...short];
-}
-
-/* ── pre-render to offscreen canvas ─────────────────── */
-function buildSketchData(image, targetW, targetH){
-  const WORK_W = 512; // higher res working canvas for clean lines
-  const {edge,mag,W,H} = extractEdges(image, WORK_W);
-  const rawStrokes = walkStrokes(edge, mag, W, H);
-  const ordered = orderStrokesNaturally(rawStrokes, W, H);
-
-  // Scale strokes from working space to target output space
-  const sx = targetW/W, sy = targetH/H;
-  const rand = seededRand(0xdeadbeef);
-
-  const finalStrokes = ordered.map((pts,i)=>{
-    const isLong = pts.length > 80;
-    const isMed  = pts.length >= 20;
-    // Pressure: outlines thicker, details finer — like a real artist
-    const base = isLong ? 3.2 : isMed ? 2.6 : 2.0;
-    const pressure = base + rand()*0.6;
-    const alpha = isLong ? 0.92 : isMed ? 0.82 : 0.70;
-    // Scale + tiny organic wobble (consistent per stroke via seeded rand)
-    const wRand = seededRand(i*999983+7);
-    const wobAmt = isLong ? 0.4 : 0.2;
-    const scaled = pts.map(([x,y])=>[
-      x*sx + (wRand()-0.5)*wobAmt,
-      y*sy + (wRand()-0.5)*wobAmt
-    ]);
-    return {pts:scaled, pressure, alpha, isLong, isMed};
-  });
-
-  // Build cumulative point index for O(1) animation frame lookup
-  // Time is proportional to number of points — longer strokes take longer
-  const totalPts = finalStrokes.reduce((a,s)=>a+s.pts.length,0);
-  let cum=0;
-  const timeline = finalStrokes.map(s=>{
-    const w = s.pts.length/totalPts;
-    const tStart=cum; cum+=w;
-    return {...s, tStart, tEnd:cum};
-  });
-
-  // Pre-render completed sketch to an offscreen canvas ONCE
-  // (used when progress=1 — just blit this, don't re-stroke)
-  const preCanvas = document.createElement('canvas');
-  preCanvas.width=targetW; preCanvas.height=targetH;
-  const pc = preCanvas.getContext('2d');
-  pc.lineCap='round'; pc.lineJoin='round';
-  for(const s of finalStrokes){
-    pc.globalAlpha=s.alpha;
-    pc.strokeStyle='#1c1c2e';
-    pc.lineWidth=s.pressure;
-    pc.beginPath();
-    catmullRomPath(pc, s.pts, 0.5);
-    pc.stroke();
-  }
-  pc.globalAlpha=1;
-
-  return {timeline, preCanvas, totalPts};
-}
-
-/* ── per-scene cache ──────────────────────────────────── */
-function getSketchData(scene, explIdx, cell){
-  if(!scene.sketchCache) scene.sketchCache=[];
-  if(scene.sketchCache[explIdx]) return scene.sketchCache[explIdx];
-  const r = fitInCell(scene.explImgs[explIdx].img, cell, ZONE_PAD*0.5);
-  const data = buildSketchData(scene.explImgs[explIdx].img, Math.round(r.w), Math.round(r.h));
-  scene.sketchCache[explIdx]=data;
-  return data;
-}
-
-/* ============================================================
-   DRAWING
-   ============================================================ */
-function drawBG(){ ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,CW,CH); }
-
-function drawCharacter(entry){
-  if(!entry) return;
-  const r=fitInCell(entry.img, LEFT_ZONE, ZONE_PAD);
-  ctx.drawImage(entry.img, r.x, r.y, r.w, r.h);
-}
-
-function smoothstep(t){ return t*t*(3-2*t); }
-
-function drawExplainerCell(entry, scene, explIdx, cell, progress){
-  const r = fitInCell(entry.img, cell, ZONE_PAD*0.5);
-  const sd = getSketchData(scene, explIdx, cell);
-  const {timeline, preCanvas} = sd;
-
-  if(progress <= 0) return null;
-
-  // If complete — just blit the pre-rendered canvas, O(1)
-  if(progress >= 1){
-    ctx.drawImage(preCanvas, r.x, r.y);
-    // Fade in colour image on top
-    ctx.save();
-    ctx.globalAlpha = Math.min(1,(progress-0.92)/0.08);
-    ctx.drawImage(entry.img, r.x, r.y, r.w, r.h);
-    ctx.restore();
-    return null;
-  }
-
-  // Ease the overall progress so the drawing feels like it
-  // starts confidently, flows through the middle, then slows
-  // slightly on fine details at the end
-  const eased = progress < 0.7
-    ? smoothstep(progress/0.7)*0.7
-    : 0.7 + smoothstep((progress-0.7)/0.3)*0.3;
-
-  let penPt = null;
-
-  ctx.save();
-  ctx.lineCap='round'; ctx.lineJoin='round';
-
-  for(const slot of timeline){
-    if(slot.tStart >= eased) break; // not reached yet in time
-
-    const slotP = Math.min(1,(eased-slot.tStart)/(slot.tEnd-slot.tStart));
-    // Ease within each individual stroke: slow start, fast middle, slow end
-    const strokeEase = smoothstep(slotP);
-    const take = Math.max(2, Math.floor(slot.pts.length * strokeEase));
-
-    const pts = slot.pts.slice(0, take);
-
-    ctx.globalAlpha = slot.alpha;
-    ctx.strokeStyle = '#1c1c2e';
-    ctx.lineWidth = slot.pressure;
-    ctx.beginPath();
-    catmullRomPath(ctx, pts.map(([x,y])=>[x+r.x, y+r.y]), 0.5);
-    ctx.stroke();
-
-    // Track pen tip at the active (last incomplete) stroke
-    if(slotP < 1){
-      const tip = pts[pts.length-1];
-      penPt = { x: tip[0]+r.x, y: tip[1]+r.y };
-    }
-  }
-
-  ctx.globalAlpha=1;
-  ctx.restore();
-
-  // Colour fade-in at the very end
-  if(progress >= 0.92){
-    ctx.save();
-    ctx.globalAlpha = Math.min(1,(progress-0.92)/0.08);
-    ctx.drawImage(entry.img, r.x, r.y, r.w, r.h);
-    ctx.restore();
-  }
-
-  return penPt;
-}
-
-// Clean realistic pencil + hand icon
-function drawHand(x, y, angle){
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(angle);
-
-  // Pencil body
-  ctx.fillStyle='#f5c842';
-  ctx.beginPath(); ctx.roundRect(-58,-7,54,14,3); ctx.fill();
-  // Pencil stripe
-  ctx.fillStyle='#e8b800';
-  ctx.fillRect(-36,-7,6,14);
-  // Eraser ferrule (silver band)
-  ctx.fillStyle='#c0c0c0';
-  ctx.beginPath(); ctx.roundRect(-62,-6,8,12,2); ctx.fill();
-  // Eraser (pink)
-  ctx.fillStyle='#f4a0a0';
-  ctx.beginPath(); ctx.roundRect(-70,-5,10,10,2); ctx.fill();
-  // Wood cone
-  ctx.fillStyle='#c8956c';
-  ctx.beginPath(); ctx.moveTo(-4,-7); ctx.lineTo(-4,7); ctx.lineTo(6,0); ctx.closePath(); ctx.fill();
-  // Graphite tip
-  ctx.fillStyle='#3a3a3a';
-  ctx.beginPath(); ctx.moveTo(3,-2.5); ctx.lineTo(3,2.5); ctx.lineTo(10,0); ctx.closePath(); ctx.fill();
-
-  // Hand
-  ctx.fillStyle='#fcd9b6';
-  ctx.beginPath(); ctx.ellipse(-26,1,32,22,0.12,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle='#c8956c'; ctx.lineWidth=1.8; ctx.stroke();
-  // Knuckle lines
-  ctx.strokeStyle='rgba(180,130,90,0.6)'; ctx.lineWidth=1.2;
-  [-18,-28,-36].forEach(kx=>{
-    ctx.beginPath(); ctx.arc(kx,-9,5,0.3,Math.PI-0.3); ctx.stroke();
-  });
-  // Thumb
-  ctx.fillStyle='#fcd9b6';
-  ctx.beginPath(); ctx.ellipse(-13,13,13,8,-0.5,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle='#c8956c'; ctx.lineWidth=1.5; ctx.stroke();
-
-  ctx.restore();
-}
-
-/* ============================================================
-   FRAME RENDERING
-   ============================================================ */
-function renderFrame(sceneIdx, slideX, activeExplIdx, perImageProgress){
-  drawBG();
-  if(!scenes.length) return;
-  const sc = scenes[sceneIdx];
-
-  ctx.save();
-  ctx.translate(slideX, 0);
-
-  drawCharacter(sc.charImg);
-
-  const cells = gridCells(sc.explImgs.length, RIGHT_ZONE.x+ZONE_PAD, RIGHT_ZONE.y+ZONE_PAD,
-                           RIGHT_ZONE.w-ZONE_PAD*2, RIGHT_ZONE.h-ZONE_PAD*2, GRID_GUTTER);
-
-  let penPt = null, penAngle = -0.3;
-  sc.explImgs.forEach((entry, i) => {
-    let p;
-    if(i < activeExplIdx) p = 1;
-    else if(i === activeExplIdx) p = perImageProgress;
-    else p = 0;
-    const tip = drawExplainerCell(entry, sc, i, cells[i], p);
-    if(i === activeExplIdx && p < 1 && p > 0) penPt = tip;
-  });
-
-  if(penPt) drawHand(penPt.x, penPt.y, penAngle);
-
-  ctx.restore();
-}
-
-function drawStillFrame(idx){
-  const sc = scenes[idx];
-  renderFrame(idx, 0, sc.explImgs.length, 1);
-}
-
-/* ============================================================
-   ANIMATION / PLAYBACK
-   ============================================================ */
-function playVideo(){
-  if(!scenes.length) return;
-  if(isPlaying){
-    isPlaying = false; cancelAnimationFrame(rafId);
+// ── Playback ──────────────────────────────────────────────
+function playVideo() {
+  if (!scenes.length) return;
+  if (isPlaying) {
+    isPlaying = false;
+    cancelAnimationFrame(rafId);
     document.getElementById('playBtn').textContent = '▶ Play';
-    setStatusLine('⏸ Paused');
+    setStatus('⏸ Paused');
     return;
   }
   isPlaying = true;
   document.getElementById('playBtn').textContent = '⏸ Pause';
-  setStatusLine('▶ Playing…');
-  runAnimation();
+  setStatus('▶ Playing…');
+  runAnimation(null);
 }
 
-function runAnimation(onComplete){
-  let si=0, slideX=-CW, phase='slide_in', timer=0, last=null, activeExplIdx=0;
-  const SLIDE_SPEED=20, SKETCH_MS_PER_IMG=3000, HOLD_MS=1200;
-
-  function frame(ts){
-    if(!isPlaying) return;
-    const dt = last ? Math.min(ts-last,50) : 16; last = ts;
-    const sc = scenes[si];
-    const nImgs = sc.explImgs.length;
-
-    if(phase === 'slide_in'){
-      slideX += SLIDE_SPEED * (dt/16);
-      if(slideX >= 0){ slideX = 0; phase='sketch'; timer=0; activeExplIdx=0; }
-      renderFrame(si, slideX, 0, 0);
-    } else if(phase === 'sketch'){
-      timer += dt;
-      const p = Math.min(1, timer / SKETCH_MS_PER_IMG);
-      renderFrame(si, 0, activeExplIdx, p);
-      if(p >= 1){
-        activeExplIdx++;
-        timer = 0;
-        if(activeExplIdx >= nImgs){ phase='hold'; }
-      }
-    } else if(phase === 'hold'){
-      timer += dt;
-      renderFrame(si, 0, nImgs, 1);
-      if(timer >= HOLD_MS){
-        si++;
-        if(si >= scenes.length){
-          isPlaying = false;
-          document.getElementById('playBtn').textContent = '▶ Play Again';
-          setStatusLine('✅ Done!');
-          if(onComplete) onComplete();
-          return;
-        }
-        phase='slide_in'; slideX=-CW; timer=0; activeExplIdx=0;
-      }
-    }
-    rafId = requestAnimationFrame(frame);
-  }
-  rafId = requestAnimationFrame(frame);
-}
-
-/* ============================================================
-   EXPORT
-   ============================================================ */
-async function downloadVideo(){
-  if(!scenes.length || isPlaying) return;
-  setStatusLine('⏺ Recording…');
-  document.getElementById('saveBtn').disabled = true;
-  document.getElementById('playBtn').disabled = true;
-  recordedChunks = [];
-
-  const stream = canvas.captureStream(30);
-  const mime = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm']
-    .find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
-  mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
-  mediaRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
-  mediaRecorder.onstop = () => {
-    const blob = new Blob(recordedChunks, { type: mime });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'explainer-video.webm'; a.click();
-    URL.revokeObjectURL(url);
-    setStatusLine('✅ Saved! Tap "Edit in Canva" below for next steps.');
-    document.getElementById('saveBtn').disabled = false;
-    document.getElementById('playBtn').disabled = false;
-  };
-  mediaRecorder.start();
-  isPlaying = true;
-  document.getElementById('playBtn').textContent = '⏺ Recording…';
-  runAnimation(() => {
-    if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-    document.getElementById('playBtn').textContent = '▶ Play Again';
-  });
-}
-
-/* ============================================================
-   MISC
-   ============================================================ */
-function resetAll(){
-  if(!confirm('Reset everything? This clears your script, images, and scenes.')) return;
-  isPlaying = false; if(rafId) cancelAnimationFrame(rafId);
+// ── Reset ─────────────────────────────────────────────────
+function resetAll() {
+  if (!confirm('Reset everything?')) return;
+  isPlaying = false;
+  cancelAnimationFrame(rafId);
   scenes = []; draftChar = null; draftExpl = [];
   renderCharRow(); renderExplRow(); renderSceneList();
   document.getElementById('sceneNumLabel').textContent = '1';
-  document.getElementById('sceneCard').style.display = 'none';
-  document.getElementById('stageCard').style.display = 'none';
-  document.getElementById('ctrlCard').style.display = 'none';
+  ['sceneCard','stageCard','ctrlCard'].forEach(id => document.getElementById(id).style.display = 'none');
   document.getElementById('stageEmpty').style.display = 'flex';
-  ctx.clearRect(0,0,CW,CH);
-  updateStatus();
+  document.getElementById('playBtn').disabled = true;
+  document.getElementById('saveBtn').disabled = true;
+  ctx.clearRect(0, 0, CW, CH);
+  updateAddBtn();
 }
 
-function setStatusLine(msg){ document.getElementById('status').textContent = msg; }
-function showOverlay(msg){ document.getElementById('overlayTxt').textContent = msg; document.getElementById('overlay').style.display='flex'; }
-function hideOverlay(){ document.getElementById('overlay').style.display = 'none'; }
+// ── Settings ──────────────────────────────────────────────
+const DEFAULTS = {
+  sThick:'2.2', sPressure:'0.45', sWobble:'0.6',
+  sSpeed:'3.5', sPause:'0.02', sHold:'1.2',
+  sEdge:'55', sTexture:'0.35'
+};
+const CFG_MAP = {
+  sThick:'strokeThick', sPressure:'pressureVar', sWobble:'wobble',
+  sSpeed:'secPerImage', sPause:'pauseBetween', sHold:'holdSec',
+  sEdge:'edgeThreshold', sTexture:'pencilTexture'
+};
 
+function syncSetting(el, valId) {
+  document.getElementById(valId).textContent = el.value;
+  CFG[CFG_MAP[el.id]] = parseFloat(el.value);
+  // Invalidate sketch cache when detection settings change
+  if (el.id === 'sEdge') scenes.forEach(sc => sc.sketchData = null);
+}
+function resetSettings() {
+  Object.entries(DEFAULTS).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    el.value = val;
+    const valId = id + 'Val';
+    document.getElementById(valId).textContent = val;
+    CFG[CFG_MAP[id]] = parseFloat(val);
+  });
+}
+function openSettings()  { document.getElementById('settingsModal').style.display = 'flex'; }
+function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
+function openCanva()     { document.getElementById('canvaModal').style.display = 'flex'; }
+function closeCanva()    { document.getElementById('canvaModal').style.display = 'none'; }
+
+// ── Progress display ──────────────────────────────────────
+function showProgress(show, msg = '') {
+  document.getElementById('progressWrap').style.display = show ? '' : 'none';
+  if (msg) document.getElementById('progressTxt').textContent = msg;
+}
+function updateProgress(p) {
+  document.getElementById('progressFill').style.width = `${Math.round(p * 100)}%`;
+  document.getElementById('progressTxt').textContent = `Analysing… ${Math.round(p * 100)}%`;
+}
+
+// ── Status line ───────────────────────────────────────────
+function setStatus(msg) { document.getElementById('status').textContent = msg; }
+
+// ── Boot ──────────────────────────────────────────────────
 renderCharRow();
 renderExplRow();
+updateAddBtn();
+drawBackground();
 </script>
 </body>
 </html>
