@@ -276,9 +276,11 @@ const CFG = {
   secPerImage: 5,     // seconds to sketch each explainer image
   holdSec:     1.2,   // hold time after a scene finishes sketching
 
-  textZoneH:  180,    // blank px at top-left for Canva text
-  zonePad:    22,     // inner padding in each zone
-  gridGutter: 16,     // px between grid cells
+  textZoneH:   180,   // blank px at top-left for Canva text
+  captionGap:  90,    // blank px reserved below the character for captions — pushes character up
+  zonePad:     22,     // inner padding in each zone
+  gridGutterX: 16,     // horizontal px between grid columns
+  gridGutterY: 6,      // vertical px between grid rows — kept tight so top/bottom rows sit close
 
   handSize:      180,
   handOffsetXPct: -10,
@@ -297,7 +299,7 @@ canvas.width = CW; canvas.height = CH;
 const LEFT_W     = Math.round(CW * 0.4);
 const RIGHT_X    = LEFT_W;
 const RIGHT_W    = CW - LEFT_W;
-const CHAR_ZONE  = { x: 0,       y: CFG.textZoneH, w: LEFT_W,  h: CH - CFG.textZoneH };
+const CHAR_ZONE  = { x: 0,       y: CFG.textZoneH, w: LEFT_W,  h: CH - CFG.textZoneH - CFG.captionGap };
 const EXPL_ZONE  = { x: RIGHT_X, y: 0,              w: RIGHT_W, h: CH };
 
 /* ════════════════════════════════════════════════════════════
@@ -347,32 +349,32 @@ function fitBox(imgW, imgH, box, pad = 0) {
   };
 }
 
-function gridCells(n, zone, gutter) {
+function gridCells(n, zone, gutterX, gutterY) {
   const { x, y, w, h } = zone;
   const cells = [];
   if (n === 1) {
     cells.push({ x, y, w, h });
   } else if (n === 2) {
-    const cw = (w - gutter) / 2;
-    cells.push({ x,             y, w: cw, h });
-    cells.push({ x: x+cw+gutter, y, w: cw, h });
+    const cw = (w - gutterX) / 2;
+    cells.push({ x,              y, w: cw, h });
+    cells.push({ x: x+cw+gutterX, y, w: cw, h });
   } else if (n === 3) {
-    const cw = (w - gutter * 2) / 3;
+    const cw = (w - gutterX * 2) / 3;
     for (let i = 0; i < 3; i++)
-      cells.push({ x: x + i*(cw+gutter), y, w: cw, h });
+      cells.push({ x: x + i*(cw+gutterX), y, w: cw, h });
   } else if (n === 4) {
-    const cw = (w - gutter) / 2, ch = (h - gutter) / 2;
+    const cw = (w - gutterX) / 2, ch = (h - gutterY) / 2;
     for (let r = 0; r < 2; r++) for (let c = 0; c < 2; c++)
-      cells.push({ x: x+c*(cw+gutter), y: y+r*(ch+gutter), w: cw, h: ch });
+      cells.push({ x: x+c*(cw+gutterX), y: y+r*(ch+gutterY), w: cw, h: ch });
   } else if (n === 5) {
-    const ch = (h - gutter) / 2;
-    const cwT = (w - gutter * 2) / 3, cwB = (w - gutter) / 2;
-    for (let i = 0; i < 3; i++) cells.push({ x: x+i*(cwT+gutter), y,              w: cwT, h: ch });
-    for (let i = 0; i < 2; i++) cells.push({ x: x+i*(cwB+gutter), y: y+ch+gutter, w: cwB, h: ch });
+    const ch = (h - gutterY) / 2;
+    const cwT = (w - gutterX * 2) / 3, cwB = (w - gutterX) / 2;
+    for (let i = 0; i < 3; i++) cells.push({ x: x+i*(cwT+gutterX), y,               w: cwT, h: ch });
+    for (let i = 0; i < 2; i++) cells.push({ x: x+i*(cwB+gutterX), y: y+ch+gutterY, w: cwB, h: ch });
   } else {
-    const cw = (w - gutter * 2) / 3, ch = (h - gutter) / 2;
+    const cw = (w - gutterX * 2) / 3, ch = (h - gutterY) / 2;
     for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++)
-      cells.push({ x: x+c*(cw+gutter), y: y+r*(ch+gutter), w: cw, h: ch });
+      cells.push({ x: x+c*(cw+gutterX), y: y+r*(ch+gutterY), w: cw, h: ch });
   }
   return cells;
 }
@@ -383,7 +385,7 @@ function getSceneCells(sc) {
     y: EXPL_ZONE.y + CFG.zonePad,
     w: EXPL_ZONE.w - CFG.zonePad * 2,
     h: EXPL_ZONE.h - CFG.zonePad * 2,
-  }, CFG.gridGutter);
+  }, CFG.gridGutterX, CFG.gridGutterY);
 }
 
 /* ════════════════════════════════════════════════════════════
