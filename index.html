@@ -22,7 +22,6 @@
 html, body { background: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; }
 body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-/* ── Top bar ──────────────────────────────────────────────── */
 #topbar {
   flex-shrink: 0; padding: 11px 14px;
   background: var(--panel); border-bottom: 1px solid var(--line);
@@ -38,18 +37,15 @@ body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; 
   border-radius: 8px; padding: 6px 10px; cursor: pointer; font-family: inherit;
 }
 
-/* ── Scroll area ──────────────────────────────────────────── */
 #scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 #inner  { padding: 12px; display: flex; flex-direction: column; gap: 12px; padding-bottom: 28px; }
 
-/* ── Cards ────────────────────────────────────────────────── */
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 13px; padding: 13px; }
 .card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 9px; }
 .hint { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
 .badge { display: inline-block; font-size: 10.5px; font-weight: 700; color: var(--accent);
   background: rgba(91,140,255,.1); border-radius: 5px; padding: 2px 7px; margin-bottom: 7px; }
 
-/* ── Upload grid ──────────────────────────────────────────── */
 .upload-row { display: flex; gap: 7px; flex-wrap: wrap; }
 .upload-box {
   width: 58px; height: 58px; border-radius: 9px; border: 1.5px dashed var(--line);
@@ -69,7 +65,6 @@ body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; 
 }
 input[type=file] { display: none; }
 
-/* ── Buttons ──────────────────────────────────────────────── */
 .btn-row { display: flex; gap: 7px; margin-top: 4px; }
 button { font-family: inherit; border: none; border-radius: 9px; cursor: pointer; font-weight: 700; font-size: 12.5px; padding: 10px 13px; }
 button:disabled { opacity: .32; cursor: not-allowed; }
@@ -78,13 +73,17 @@ button:disabled { opacity: .32; cursor: not-allowed; }
 .btn-ok    { background: linear-gradient(135deg, #1e9e6a, var(--green)); color: #06251a; }
 .btn-sm    { padding: 6px 9px; font-size: 11px; border-radius: 7px; }
 
-/* ── Stage ────────────────────────────────────────────────── */
-#stageCard { padding: 0; overflow: hidden; }
+#stageCard { padding: 0; overflow: hidden; position: relative; }
 #stageWrap { background: #0a0a10; aspect-ratio: 16/9; width: 100%; position: relative; display: flex; align-items: center; justify-content: center; }
 #stage     { width: 100%; height: 100%; object-fit: contain; }
 #stageEmpty{ position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; text-align: center; padding: 18px; }
+#prepOverlay {
+  position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.55); color: #a5b4fc; font-size: 12px; font-weight: 700; flex-direction: column; gap: 8px;
+}
+.spinner { width: 26px; height: 26px; border: 3px solid rgba(91,140,255,.25); border-top: 3px solid var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Scene list ───────────────────────────────────────────── */
 #sceneList { display: flex; flex-direction: column; gap: 7px; }
 .scene-row {
   display: flex; align-items: center; gap: 9px;
@@ -106,13 +105,8 @@ button:disabled { opacity: .32; cursor: not-allowed; }
   font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 
-/* ── Status ───────────────────────────────────────────────── */
 #status { font-size: 11.5px; color: var(--green); font-weight: 600; text-align: center; min-height: 15px; }
 
-/* ── Progress bar (shows during sketch pre-build) ────────── */
-
-
-/* ── Settings modal ───────────────────────────────────────── */
 #settingsModal {
   position: fixed; inset: 0; background: rgba(8,8,14,.93);
   display: none; align-items: flex-end; justify-content: center; z-index: 60; padding: 16px;
@@ -136,7 +130,6 @@ input[type=range]::-webkit-slider-thumb {
 .setting-section { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase;
   letter-spacing: .06em; margin: 14px 0 8px; }
 
-/* ── Canva modal ──────────────────────────────────────────── */
 #canvaModal {
   position: fixed; inset: 0; background: rgba(8,8,14,.93);
   display: none; align-items: center; justify-content: center; z-index: 60; padding: 18px;
@@ -177,13 +170,12 @@ input[type=range]::-webkit-slider-thumb {
   <div class="card">
     <div class="card-title">Explainer images (1–6 per scene)</div>
     <div class="upload-row" id="explRow"></div>
-    <div class="hint">Up to 6 — arranged in a grid, each sketch-drawn one at a time. The top-left area is left blank for your Canva text.</div>
+    <div class="hint">Up to 6 — arranged in a grid, each hand-sketched one at a time just like the doodle app. The top-left area is left blank for your Canva text.</div>
   </div>
 
   <div class="card">
     <button class="btn-pri" id="addBtn" onclick="addScene()" style="width:100%">➕ Add Scene</button>
     <div id="status" style="margin-top:9px;">Add a character image and at least one explainer image.</div>
-
   </div>
 
   <!-- Built scenes -->
@@ -197,6 +189,7 @@ input[type=range]::-webkit-slider-thumb {
     <div id="stageWrap">
       <canvas id="stage"></canvas>
       <div id="stageEmpty">Add scenes to preview</div>
+      <div id="prepOverlay"><div class="spinner"></div><span id="prepText">Preparing sketch…</span></div>
     </div>
   </div>
 
@@ -219,45 +212,28 @@ input[type=range]::-webkit-slider-thumb {
   <div id="settingsBox">
     <h3>⚙ Drawing Settings</h3>
 
-    <div class="setting-section">Stroke</div>
+    <div class="setting-section">Sketch (matches doodle app)</div>
     <div class="setting-row">
-      <label>Stroke thickness</label>
-      <input type="range" id="sThick" min="0.5" max="5" step="0.1" value="2.2" oninput="syncSetting(this,'sThickVal')">
-      <span class="val" id="sThickVal">2.2</span>
+      <label>Marker thickness</label>
+      <input type="range" id="sThick" min="1" max="5" step="0.5" value="2" oninput="syncSetting(this,'sThickVal')">
+      <span class="val" id="sThickVal">2</span>
     </div>
     <div class="setting-row">
-      <label>Pressure variation</label>
-      <input type="range" id="sPressure" min="0" max="1" step="0.05" value="0.45" oninput="syncSetting(this,'sPressureVal')">
-      <span class="val" id="sPressureVal">0.45</span>
-    </div>
-    <div class="setting-row">
-      <label>Line wobble</label>
-      <input type="range" id="sWobble" min="0" max="2" step="0.1" value="0.6" oninput="syncSetting(this,'sWobbleVal')">
-      <span class="val" id="sWobbleVal">0.6</span>
+      <label>Darkness threshold</label>
+      <input type="range" id="sDarkness" min="50" max="230" step="1" value="150" oninput="syncSetting(this,'sDarknessVal')">
+      <span class="val" id="sDarknessVal">150</span>
     </div>
 
     <div class="setting-section">Timing</div>
     <div class="setting-row">
       <label>Draw speed (sec / image)</label>
-      <input type="range" id="sSpeed" min="1" max="8" step="0.5" value="3.5" oninput="syncSetting(this,'sSpeedVal')">
-      <span class="val" id="sSpeedVal">3.5</span>
-    </div>
-    <div class="setting-row">
-      <label>Pause between strokes</label>
-      <input type="range" id="sPause" min="0" max="0.08" step="0.005" value="0.02" oninput="syncSetting(this,'sPauseVal')">
-      <span class="val" id="sPauseVal">0.02</span>
+      <input type="range" id="sSpeed" min="1" max="15" step="0.5" value="5" oninput="syncSetting(this,'sSpeedVal')">
+      <span class="val" id="sSpeedVal">5</span>
     </div>
     <div class="setting-row">
       <label>Hold time after scene (sec)</label>
       <input type="range" id="sHold" min="0.5" max="3" step="0.1" value="1.2" oninput="syncSetting(this,'sHoldVal')">
       <span class="val" id="sHoldVal">1.2</span>
-    </div>
-
-    <div class="setting-section">Quality</div>
-    <div class="setting-row">
-      <label>Sketch contrast</label>
-      <input type="range" id="sTexture" min="0" max="1" step="0.05" value="0.35" oninput="syncSetting(this,'sTextureVal')">
-      <span class="val" id="sTextureVal">0.35</span>
     </div>
 
     <div class="btn-row" style="margin-top:14px;">
@@ -290,74 +266,76 @@ input[type=range]::-webkit-slider-thumb {
 
 /* ════════════════════════════════════════════════════════════
    MODULE 1 — CONFIGURATION
-   Central settings object. All tuneable parameters live here.
+   Sketch parameters mirror the doodle software's settings
+   exactly (thickness / darkness threshold / duration), so the
+   look/feel of the drawing matches 1:1.
    ════════════════════════════════════════════════════════════ */
 const CFG = {
-  // Stroke appearance
-  strokeThick:    2.2,   // base line width in px (at working resolution)
-  pressureVar:    0.45,  // how much pressure varies (0 = none, 1 = max)
-  wobble:         0.6,   // hand wobble amplitude in px
-  pencilTexture:  0.35,  // 0 = smooth, 1 = heavy grain
+  thickness:   2,     // marker dot radius, px
+  darkness:    150,   // darkness threshold (0-255, lower = only very dark pixels count)
+  secPerImage: 5,     // seconds to sketch each explainer image
+  holdSec:     1.2,   // hold time after a scene finishes sketching
 
-  // Timing (seconds)
-  secPerImage:    3.5,   // total sketch time per explainer image
-  pauseBetween:   0.02,  // fraction of secPerImage used as inter-stroke pauses
-  holdSec:        1.2,   // how long to hold a completed scene before moving on
+  textZoneH:  180,    // blank px at top-left for Canva text
+  zonePad:    22,     // inner padding in each zone
+  gridGutter: 16,     // px between grid cells
 
-  // Detection
-  edgeThreshold:  55,    // Canny high threshold (lower = more edges detected)
-
-  // Layout (fixed — not exposed in settings)
-  textZoneH:      180,   // blank px at top-left for Canva text
-  zonePad:        22,    // inner padding in each zone
-  gridGutter:     16,    // px between grid cells
-  workRes:        600,   // edge-detection working resolution (longer side)
+  handSize:      180,
+  handOffsetXPct: -10,
+  handOffsetYPct: -90,
+  imgPauseMs:    300, // brief pause after an image pops to color, before next image starts
 };
-
 
 /* ════════════════════════════════════════════════════════════
    MODULE 2 — CANVAS SETUP & LAYOUT
-   All layout zones computed once from canvas dimensions.
    ════════════════════════════════════════════════════════════ */
 const CW = 1280, CH = 720;
 const canvas = document.getElementById('stage');
 const ctx    = canvas.getContext('2d', { alpha: false });
 canvas.width = CW; canvas.height = CH;
 
-// Layout zones
 const LEFT_W     = Math.round(CW * 0.4);
 const RIGHT_X    = LEFT_W;
 const RIGHT_W    = CW - LEFT_W;
-const TEXT_ZONE  = { x: 0,      y: 0,            w: LEFT_W,  h: CFG.textZoneH };
-const CHAR_ZONE  = { x: 0,      y: CFG.textZoneH, w: LEFT_W,  h: CH - CFG.textZoneH };
-const EXPL_ZONE  = { x: RIGHT_X, y: 0,            w: RIGHT_W, h: CH };
-
+const CHAR_ZONE  = { x: 0,       y: CFG.textZoneH, w: LEFT_W,  h: CH - CFG.textZoneH };
+const EXPL_ZONE  = { x: RIGHT_X, y: 0,              w: RIGHT_W, h: CH };
 
 /* ════════════════════════════════════════════════════════════
-   MODULE 3 — MATH & GEOMETRY HELPERS
+   MODULE 3 — HAND GRAPHIC (ported directly from the doodle app)
    ════════════════════════════════════════════════════════════ */
+const HAND_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" style="overflow:visible">
+  <defs><filter id="sh"><feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.3"/></filter></defs>
+  <g filter="url(#sh)">
+    <path d="M120 400 L350 120 L370 135 L140 415 Z" fill="#2C3E50"/>
+    <path d="M120 400 L140 415 L90 450 Z" fill="#E0C097"/>
+    <path d="M280 350 C 350 300,450 400,480 600" stroke="#F5D0C5" stroke-width="130" stroke-linecap="round"/>
+    <path d="M200 340 C 250 380,320 320,310 270" stroke="#F5D0C5" stroke-width="60" stroke-linecap="round" fill="none"/>
+    <ellipse cx="305" cy="275" rx="18" ry="22" transform="rotate(-20 305 275)" fill="#FFC1CC"/>
+    <path d="M150 300 C 180 280,260 180,360 210" stroke="#F5D0C5" stroke-width="55" stroke-linecap="round" fill="none"/>
+    <ellipse cx="355" cy="210" rx="18" ry="22" transform="rotate(70 355 210)" fill="#FFC1CC"/>
+    <path d="M220 380 C 260 360,280 320,260 240" stroke="#F5D0C5" stroke-width="55" stroke-linecap="round" fill="none"/>
+    <ellipse cx="260" cy="245" rx="16" ry="20" transform="rotate(-10 260 245)" fill="#FFC1CC"/>
+    <path d="M400 450 L650 650 L350 750 Z" fill="#2C3E50"/>
+  </g>
+</svg>`;
+const handImg = new Image();
+handImg.src = 'data:image/svg+xml;base64,' + btoa(HAND_SVG);
 
-/** Smoothstep easing: slow-fast-slow, C1 continuous */
-function smoothstep(t) { return t * t * (3 - 2 * t); }
-
-/** Ease-in-out cubic */
-function easeInOut(t) { return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2; }
-
-/** Seeded pseudo-random generator (Mulberry32).
- *  Returns a function that yields consistent values for the same seed.
- *  Crucial for stable wobble — must look the same on every redraw. */
-function makeRng(seed) {
-  let s = seed >>> 0;
-  return () => {
-    s += 0x6D2B79F5;
-    let t = Math.imul(s ^ s >>> 15, 1 | s);
-    t ^= t + Math.imul(t ^ t >>> 7, 61 | t);
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  };
+function drawHand(px, py) {
+  if (!handImg.complete || !handImg.naturalWidth) return;
+  const hW = CFG.handSize;
+  const hH = (handImg.height / handImg.width) * hW;
+  ctx.drawImage(
+    handImg,
+    px + (CFG.handOffsetXPct / 100 * hW),
+    py + (CFG.handOffsetYPct / 100 * hH),
+    hW, hH
+  );
 }
 
-/** Fit an image inside a box, centred, preserving aspect ratio.
- *  Returns {x, y, w, h} in canvas space. */
+/* ════════════════════════════════════════════════════════════
+   MODULE 4 — GEOMETRY HELPERS
+   ════════════════════════════════════════════════════════════ */
 function fitBox(imgW, imgH, box, pad = 0) {
   const bw = box.w - pad * 2, bh = box.h - pad * 2;
   const scale = Math.min(bw / imgW, bh / imgH);
@@ -369,7 +347,6 @@ function fitBox(imgW, imgH, box, pad = 0) {
   };
 }
 
-/** Compute grid cell rectangles for 1-6 images in the right zone. */
 function gridCells(n, zone, gutter) {
   const { x, y, w, h } = zone;
   const cells = [];
@@ -377,7 +354,7 @@ function gridCells(n, zone, gutter) {
     cells.push({ x, y, w, h });
   } else if (n === 2) {
     const cw = (w - gutter) / 2;
-    cells.push({ x,           y, w: cw, h });
+    cells.push({ x,             y, w: cw, h });
     cells.push({ x: x+cw+gutter, y, w: cw, h });
   } else if (n === 3) {
     const cw = (w - gutter * 2) / 3;
@@ -390,7 +367,7 @@ function gridCells(n, zone, gutter) {
   } else if (n === 5) {
     const ch = (h - gutter) / 2;
     const cwT = (w - gutter * 2) / 3, cwB = (w - gutter) / 2;
-    for (let i = 0; i < 3; i++) cells.push({ x: x+i*(cwT+gutter), y,          w: cwT, h: ch });
+    for (let i = 0; i < 3; i++) cells.push({ x: x+i*(cwT+gutter), y,              w: cwT, h: ch });
     for (let i = 0; i < 2; i++) cells.push({ x: x+i*(cwB+gutter), y: y+ch+gutter, w: cwB, h: ch });
   } else {
     const cw = (w - gutter * 2) / 3, ch = (h - gutter) / 2;
@@ -400,128 +377,106 @@ function gridCells(n, zone, gutter) {
   return cells;
 }
 
+function getSceneCells(sc) {
+  return gridCells(sc.explImgs.length, {
+    x: EXPL_ZONE.x + CFG.zonePad,
+    y: EXPL_ZONE.y + CFG.zonePad,
+    w: EXPL_ZONE.w - CFG.zonePad * 2,
+    h: EXPL_ZONE.h - CFG.zonePad * 2,
+  }, CFG.gridGutter);
+}
 
 /* ════════════════════════════════════════════════════════════
-   MODULE 4 — GRAYSCALE SKETCH BUILDER
+   MODULE 5 — SKETCH POINT EXTRACTION
    ─────────────────────────────────────────────────────────
-   Analysis of the reference video confirmed the technique:
-
-   The video does NOT draw individual strokes. Instead it uses
-   a TWO-PHASE progressive reveal:
-
-   Phase 1 (0 → 80% of draw time):
-     A desaturated (grayscale) version of the image is revealed
-     progressively from TOP TO BOTTOM behind the moving hand.
-     This simulates the pencil sketch look — image appears in
-     black and white as if being sketched.
-
-   Phase 2 (80 → 100% of draw time):
-     The full color image cross-fades over the grayscale,
-     filling in naturally as the hand completes its pass.
-     This gives the coloring-in effect seen in the video.
-
-   The hand (pen + flesh-tone fingers) sits at the current
-   reveal frontier and moves smoothly downward.
-
-   This matches the reference video exactly and works on
-   any image with no pre-processing required.
+   This is the doodle software's technique, ported directly:
+   scan the image for dark pixels below the darkness threshold,
+   split them into 4 quadrants (so the drawing fills top-left,
+   top-right, bottom-left, bottom-right in order like a real
+   hand would), sort each quadrant row-by-row with light
+   shuffling for a natural hand-drawn feel.
    ════════════════════════════════════════════════════════════ */
+function buildSketchData(img, cell) {
+  const r  = fitBox(img.width, img.height, cell, CFG.zonePad * 0.5);
+  const rx = Math.round(r.x), ry = Math.round(r.y);
+  const rw = Math.max(1, Math.round(r.w)), rh = Math.max(1, Math.round(r.h));
 
-/**
- * Build a grayscale version of an image on an offscreen canvas,
- * sized to exactly match the target output rect.
- * Cached per scene/slot to avoid repeated processing.
- */
-function buildGrayCanvas(img, rect) {
-  const gc = document.createElement('canvas');
-  gc.width  = Math.round(rect.w);
-  gc.height = Math.round(rect.h);
-  const gctx = gc.getContext('2d', { willReadFrequently: false });
-  gctx.drawImage(img, 0, 0, gc.width, gc.height);
-  const id = gctx.getImageData(0, 0, gc.width, gc.height);
-  const d  = id.data;
-  for (let i = 0; i < d.length; i += 4) {
-    const lum = (0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2]) | 0;
-    // Slight contrast boost for sketch feel
-    const v = Math.min(255, lum * 1.06) | 0;
-    d[i] = d[i+1] = d[i+2] = v;
+  const tmp = document.createElement('canvas');
+  tmp.width = rw; tmp.height = rh;
+  const tctx = tmp.getContext('2d', { willReadFrequently: true });
+  tctx.fillStyle = '#fff'; tctx.fillRect(0, 0, rw, rh);
+  tctx.drawImage(img, 0, 0, rw, rh);
+
+  const id = tctx.getImageData(0, 0, rw, rh);
+  const data = id.data;
+  const STEP = 2, qW = rw / 2, qH = rh / 2;
+  const tl = [], tr = [], bl = [], br = [];
+
+  for (let ly = 0; ly < rh; ly += STEP) {
+    for (let lx = 0; lx < rw; lx += STEP) {
+      const i = (ly * rw + lx) * 4;
+      if (data[i+3] > 128 && (data[i]*0.299 + data[i+1]*0.587 + data[i+2]*0.114) < CFG.darkness) {
+        const gx = rx + lx, gy = ry + ly;
+        if (ly < qH) { (lx < qW ? tl : tr).push({ x: gx, y: gy }); }
+        else         { (lx < qW ? bl : br).push({ x: gx, y: gy }); }
+      }
+    }
   }
-  gctx.putImageData(id, 0, 0);
-  return gc;
+
+  const sortQ = pts => {
+    pts.sort((a, b) => {
+      const rA = Math.floor(a.y / 20), rB = Math.floor(b.y / 20);
+      return rA === rB ? a.x - b.x : rA - rB;
+    });
+    for (let i = pts.length - 1; i > 0; i--) {
+      if (Math.random() > 0.8) {
+        const j = Math.max(0, i - Math.floor(Math.random() * 8));
+        [pts[i], pts[j]] = [pts[j], pts[i]];
+      }
+    }
+    return pts;
+  };
+
+  return {
+    points: [...sortQ(tl), ...sortQ(tr), ...sortQ(bl), ...sortQ(br)],
+    rect: { x: rx, y: ry, w: rw, h: rh }
+  };
 }
 
-
-/* ════════════════════════════════════════════════════════════
-   MODULE 5 — REVEAL ANIMATION ENGINE
-   ─────────────────────────────────────────────────────────
-   Manages per-slot cached canvases and computes the reveal
-   frontier position for any given progress value [0..1].
-
-   The reveal uses a smooth curved frontier (not a hard
-   horizontal line) to look more natural — the hand sweeps
-   in a slight arc as it moves across and down.
-   ════════════════════════════════════════════════════════════ */
-
-/** Cache of {grayCanvas, colorCanvas} per scene index, per image slot */
-const _slotCache = new Map();
-
-function getSlotKey(sceneIdx, slotIdx) { return `${sceneIdx}_${slotIdx}`; }
-
-/**
- * Get or build the gray+color canvas pair for a given image slot.
- * @param {object} entry     - {img, dataUrl}
- * @param {object} rect      - {x,y,w,h} on output canvas
- * @param {number} sceneIdx
- * @param {number} slotIdx
- */
-function getSlotCanvases(entry, rect, sceneIdx, slotIdx) {
-  const key = getSlotKey(sceneIdx, slotIdx);
-  if (_slotCache.has(key)) return _slotCache.get(key);
-
-  const r = fitBox(entry.img.width, entry.img.height, rect, CFG.zonePad * 0.5);
-
-  // Build grayscale canvas at output size
-  const gray = buildGrayCanvas(entry.img, r);
-
-  // Color canvas — draw image at exact same size/position
-  const col = document.createElement('canvas');
-  col.width  = Math.round(r.w);
-  col.height = Math.round(r.h);
-  const cctx = col.getContext('2d');
-  cctx.drawImage(entry.img, 0, 0, col.width, col.height);
-
-  const cached = { gray, col, rect: r };
-  _slotCache.set(key, cached);
-  return cached;
+/** Cache of sketch data per scene/slot: `${sceneIdx}_${slotIdx}` -> {points, rect} */
+const _sketchCache = new Map();
+function getSlotSketch(entry, cell, sceneIdx, slotIdx) {
+  const key = `${sceneIdx}_${slotIdx}`;
+  if (_sketchCache.has(key)) return _sketchCache.get(key);
+  const data = buildSketchData(entry.img, cell);
+  _sketchCache.set(key, data);
+  return data;
 }
+function clearSketchCache() { _sketchCache.clear(); }
 
-function clearSlotCache() { _slotCache.clear(); }
+/** Pre-computes sketch data for every explainer slot in every scene,
+ *  so the rAF playback loop (and video capture) can stay fully
+ *  synchronous and glitch-free. Shows a brief "Preparing…" overlay. */
+async function prepareAllSketchData() {
+  const overlay = document.getElementById('prepOverlay');
+  overlay.style.display = 'flex';
+  await new Promise(r => setTimeout(r, 0)); // let overlay paint
+  scenes.forEach((sc, si) => {
+    const cells = getSceneCells(sc);
+    sc.explImgs.forEach((entry, ii) => getSlotSketch(entry, cells[ii], si, ii));
+  });
+  overlay.style.display = 'none';
+}
 
 /* ════════════════════════════════════════════════════════════
    MODULE 6 — FRAME RENDERER
    ─────────────────────────────────────────────────────────
-   Draws one complete frame to the main canvas.
-
-   For each explainer image slot:
-
-   If progress = 0  → nothing drawn yet
-   If progress = 1  → full color image shown
-
-   If 0 < progress < 1:
-     1. Draw the grayscale canvas clipped to the revealed region
-        (rectangle from top of image down to frontier Y)
-     2. If progress > 0.8: cross-fade color canvas over the top
-        of the already-revealed region
-     3. Draw the hand+pen at the frontier position
-
-   The frontier is computed as a fraction of image height:
-     frontierFrac = smoothstep(min(1, progress / 0.82))
-   This gives a natural ease-in/ease-out to the hand movement.
-
-   The hand angle tilts slightly to follow the direction of
-   travel (mostly horizontal with slight downward drift).
+   Each scene owns a persistent "sketch canvas" that dots are
+   drawn onto and never cleared mid-scene (exactly like the
+   doodle app's accumulation buffer). Every render frame simply
+   composites: white background → character → persistent sketch
+   layer → hand (if actively drawing).
    ════════════════════════════════════════════════════════════ */
-
 function drawBackground() {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, CW, CH);
@@ -533,229 +488,71 @@ function drawCharacterImage(entry) {
   ctx.drawImage(entry.img, r.x, r.y, r.w, r.h);
 }
 
-/**
- * Draw a single explainer image slot with the reveal animation.
- * Returns the pen tip position {x, y} or null if not actively drawing.
- *
- * @param {object} entry      - {img, dataUrl}
- * @param {object} cell       - grid cell {x,y,w,h} (includes padding zone)
- * @param {number} progress   - [0..1] animation progress for this slot
- * @param {number} sceneIdx
- * @param {number} slotIdx
- */
-function drawExplainerSlot(entry, cell, progress, sceneIdx, slotIdx) {
-  if (progress <= 0) return null;
-
-  const { gray, col, rect: r } = getSlotCanvases(entry, cell, sceneIdx, slotIdx);
-
-  if (progress >= 1) {
-    // Fully complete — just show color image
-    ctx.drawImage(entry.img, r.x, r.y, r.w, r.h);
-    return null;
-  }
-
-  // ── Phase split ───────────────────────────────────────────
-  // 0.00 → 0.82: gray reveal sweeps top-to-bottom
-  // 0.82 → 1.00: color cross-fades over gray in revealed zone
-  const GRAY_END   = 0.82;
-  const grayP      = Math.min(1, progress / GRAY_END);
-  const colorAlpha = progress > GRAY_END
-    ? smoothstep((progress - GRAY_END) / (1 - GRAY_END))
-    : 0;
-
-  // Frontier: how far down the image has been revealed (fraction of height)
-  // Uses smoothstep for natural ease-in and ease-out
-  const frontierFrac = smoothstep(grayP);
-  const frontierPx   = Math.round(frontierFrac * r.h);
-
-  // ── Draw grayscale in revealed region ─────────────────────
-  if (frontierPx > 0) {
-    ctx.save();
-    // Clip to revealed region (rectangle from top to frontier)
-    ctx.beginPath();
-    ctx.rect(r.x, r.y, r.w, frontierPx);
-    ctx.clip();
-    ctx.drawImage(gray, r.x, r.y, r.w, r.h);
-    ctx.restore();
-  }
-
-  // ── Cross-fade color over revealed region ─────────────────
-  if (colorAlpha > 0 && frontierPx > 0) {
-    ctx.save();
-    ctx.globalAlpha = colorAlpha;
-    ctx.beginPath();
-    ctx.rect(r.x, r.y, r.w, frontierPx);
-    ctx.clip();
-    ctx.drawImage(col, r.x, r.y, r.w, r.h);
-    ctx.restore();
-  }
-
-  // ── Compute hand/pen position at frontier ─────────────────
-  if (progress >= 1) return null;
-
-  // Hand moves in a slight S-curve horizontally as it sweeps down.
-  // This mimics natural wrist motion — not perfectly vertical.
-  const rng       = makeRng(0xFACE + slotIdx * 997);
-  const zigzag    = Math.sin(frontierFrac * Math.PI * 3) * r.w * 0.06;
-  const handX     = r.x + r.w * 0.72 + zigzag;
-  const handY     = r.y + frontierPx;
-
-  return { x: handX, y: handY };
+function makeSceneLayer() {
+  const c = document.createElement('canvas');
+  c.width = CW; c.height = CH;
+  return c;
 }
 
-/**
- * Draw the hand-and-pen graphic at (px, py).
- * The pen tip points to the lower-left (into the paper).
- */
-function drawHand(px, py) {
-  // Hand angle: pen tilts at ~35° as if held naturally
-  const angle = 0.60; // radians — matches reference video angle
-
-  ctx.save();
-  ctx.translate(px, py);
-  ctx.rotate(angle);
-
-  // ── Pen body ──────────────────────────────────────────────
-  // Dark blue/black ballpoint pen as in the reference video
-  ctx.fillStyle = '#2C3E7A';
-  ctx.beginPath();
-  ctx.roundRect(-72, -5, 68, 10, 4);
-  ctx.fill();
-
-  // Pen grip (rubberized middle section)
-  ctx.fillStyle = '#1a2455';
-  ctx.fillRect(-38, -5, 16, 10);
-
-  // Pen clip
-  ctx.fillStyle = '#3d5099';
-  ctx.fillRect(-66, -7, 4, 6);
-
-  // Pen tip (fine ballpoint)
-  ctx.fillStyle = '#c8c8c8';
-  ctx.beginPath();
-  ctx.moveTo(-4, -4); ctx.lineTo(-4, 4); ctx.lineTo(4, 0);
-  ctx.closePath(); ctx.fill();
-  ctx.fillStyle = '#1a1a1a';
-  ctx.beginPath();
-  ctx.moveTo(1, -2); ctx.lineTo(1, 2); ctx.lineTo(6, 0);
-  ctx.closePath(); ctx.fill();
-
-  // ── Hand ─────────────────────────────────────────────────
-  // Main palm/fist (flesh tone matching reference video)
-  ctx.fillStyle = '#F5C5A3';
-  ctx.beginPath();
-  ctx.ellipse(-26, 3, 34, 22, 0.1, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = '#D4956E';
-  ctx.lineWidth = 1.8;
-  ctx.stroke();
-
-  // Finger separations (top edge of fist)
-  ctx.strokeStyle = 'rgba(180,110,70,0.5)';
-  ctx.lineWidth = 1.4;
-  [-22, -32, -41].forEach(kx => {
-    ctx.beginPath();
-    ctx.arc(kx, -10, 5.5, 0.2, Math.PI - 0.2);
-    ctx.stroke();
-  });
-
-  // Index finger extended slightly (holding pen)
-  ctx.fillStyle = '#F5C5A3';
-  ctx.beginPath();
-  ctx.ellipse(-10, -14, 8, 18, 0.3, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = '#D4956E';
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  // Thumb (visible on bottom)
-  ctx.fillStyle = '#F5C5A3';
-  ctx.beginPath();
-  ctx.ellipse(-14, 16, 15, 9, -0.45, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = '#D4956E';
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  // Fingernail hint on index
-  ctx.fillStyle = 'rgba(255,230,210,0.7)';
-  ctx.beginPath();
-  ctx.ellipse(-10, -20, 4, 5, 0.3, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.restore();
-}
-
-/**
- * Render a complete animation frame.
- */
-function renderFrame(sceneIdx, slideX, activeImg, imgProgress) {
+function renderFrame(sceneIdx, slideX, sceneLayer, handPos) {
   drawBackground();
   if (!scenes.length) return;
-
-  const sc    = scenes[sceneIdx];
-  const n     = sc.explImgs.length;
-  const cells = gridCells(n, {
-    x: EXPL_ZONE.x + CFG.zonePad,
-    y: EXPL_ZONE.y + CFG.zonePad,
-    w: EXPL_ZONE.w - CFG.zonePad * 2,
-    h: EXPL_ZONE.h - CFG.zonePad * 2,
-  }, CFG.gridGutter);
+  const sc = scenes[sceneIdx];
 
   ctx.save();
   ctx.translate(slideX, 0);
-
   drawCharacterImage(sc.charImg);
-
-  let handPos = null;
-
-  sc.explImgs.forEach((entry, i) => {
-    const p = i < activeImg ? 1 : i === activeImg ? imgProgress : 0;
-    const tip = drawExplainerSlot(entry, cells[i], p, sceneIdx, i);
-    // Only show hand for the currently-active image (not completed ones)
-    if (i === activeImg && tip && p > 0 && p < 1) handPos = tip;
-  });
-
+  if (sceneLayer) ctx.drawImage(sceneLayer, 0, 0);
   if (handPos) drawHand(handPos.x, handPos.y);
-
   ctx.restore();
 }
 
+/** Fully-sketched still frame — used for scene-list previews. */
 function stillFrame(idx) {
   const sc = scenes[idx];
-  renderFrame(idx, 0, sc.explImgs.length, 1);
+  const layer = makeSceneLayer();
+  const lctx = layer.getContext('2d');
+  const cells = getSceneCells(sc);
+  sc.explImgs.forEach((entry, i) => {
+    const r = getSlotSketch(entry, cells[i], idx, i).rect;
+    lctx.drawImage(entry.img, r.x, r.y, r.w, r.h);
+  });
+  renderFrame(idx, 0, layer, null);
 }
 
-
 /* ════════════════════════════════════════════════════════════
-   MODULE 12 — ANIMATION ENGINE
+   MODULE 7 — ANIMATION ENGINE
    ─────────────────────────────────────────────────────────
-   requestAnimationFrame loop with delta-time clamping.
-
-   State machine (per scene):
-     slide_in → scene slides in from the left
-     sketch   → sequential per-image reveal (activeImg 0..N-1)
-     hold     → hold completed scene before moving to next
-
-   No preloading needed — the reveal engine computes everything
-   on-the-fly per frame using canvas clipping, which is O(1).
-   The grayscale canvases are built lazily on first draw and
-   cached in _slotCache.
+   Per scene: slide_in → sketch (image by image, dot by dot,
+   with a pause + color pop between images, exactly like the
+   doodle app) → hold → next scene.
    ════════════════════════════════════════════════════════════ */
-
 let isPlaying = false;
 let rafId     = null;
 let mediaRec  = null;
 let recChunks = [];
 
 function runAnimation(onDone) {
-  let si        = 0;
-  let phase     = 'slide_in';
-  let slideX    = -CW;
-  let activeImg = 0;
-  let imgP      = 0;
-  let holdTimer = 0;
-  let last      = null;
+  let si         = 0;
+  let phase      = 'slide_in';
+  let slideX     = -CW;
+  let sceneLayer = makeSceneLayer();
+  let lctx       = sceneLayer.getContext('2d');
+  let cells      = getSceneCells(scenes[si]);
+  let activeImg  = 0;
+  let prevIdx    = 0;
+  let imgStart   = null;
+  let holdTimer  = 0;
+  let pauseTimer = 0;
+  let last       = null;
+  let handPos    = null;
+
+  function resetSceneLayer() {
+    sceneLayer = makeSceneLayer();
+    lctx = sceneLayer.getContext('2d');
+    cells = getSceneCells(scenes[si]);
+    activeImg = 0; prevIdx = 0; imgStart = null; handPos = null;
+  }
 
   const SLIDE_SPEED = 22; // px per 16ms frame
 
@@ -766,28 +563,62 @@ function runAnimation(onDone) {
 
     if (phase === 'slide_in') {
       slideX = Math.min(0, slideX + SLIDE_SPEED * (dt / 16));
-      renderFrame(si, slideX, 0, 0);
-      if (slideX >= 0) { phase = 'sketch'; activeImg = 0; imgP = 0; }
+      renderFrame(si, slideX, sceneLayer, null);
+      if (slideX >= 0) phase = 'sketch';
     }
     else if (phase === 'sketch') {
-      const secPerImg = parseFloat(document.getElementById('sSpeed').value);
-      imgP += dt / (secPerImg * 1000);
-      if (imgP >= 1) {
-        renderFrame(si, 0, activeImg, 1);
+      const sc = scenes[si];
+      const entry = sc.explImgs[activeImg];
+      const { points, rect } = getSlotSketch(entry, cells[activeImg], si, activeImg);
+
+      if (!imgStart) imgStart = ts;
+      const dMs = CFG.secPerImage * 1000;
+      const t = Math.min((ts - imgStart) / dMs, 1);
+      const targetIdx = points.length ? Math.floor(t * points.length) : 0;
+
+      if (targetIdx > prevIdx) {
+        lctx.fillStyle = '#111';
+        let lastPt = null;
+        for (let k = prevIdx; k < targetIdx; k++) {
+          const pt = points[k];
+          lctx.beginPath();
+          lctx.arc(pt.x, pt.y, CFG.thickness, 0, Math.PI * 2);
+          lctx.fill();
+          lastPt = pt;
+        }
+        prevIdx = targetIdx;
+        if (lastPt) handPos = lastPt;
+      }
+
+      renderFrame(si, 0, sceneLayer, handPos);
+
+      if (t >= 1) {
+        // Pop full color into this slot, then brief pause before next image
+        lctx.drawImage(entry.img, rect.x, rect.y, rect.w, rect.h);
+        renderFrame(si, 0, sceneLayer, null);
+        phase = 'img_pause';
+        pauseTimer = 0;
+      }
+    }
+    else if (phase === 'img_pause') {
+      pauseTimer += dt;
+      renderFrame(si, 0, sceneLayer, null);
+      if (pauseTimer >= CFG.imgPauseMs) {
         activeImg++;
-        imgP = 0;
+        prevIdx = 0;
+        imgStart = null;
+        handPos = null;
         if (activeImg >= scenes[si].explImgs.length) {
           phase = 'hold'; holdTimer = 0;
+        } else {
+          phase = 'sketch';
         }
-      } else {
-        renderFrame(si, 0, activeImg, imgP);
       }
     }
     else if (phase === 'hold') {
-      const holdSec = parseFloat(document.getElementById('sHold').value);
       holdTimer += dt;
-      renderFrame(si, 0, scenes[si].explImgs.length, 1);
-      if (holdTimer >= holdSec * 1000) {
+      renderFrame(si, 0, sceneLayer, null);
+      if (holdTimer >= CFG.holdSec * 1000) {
         si++;
         if (si >= scenes.length) {
           isPlaying = false;
@@ -798,8 +629,7 @@ function runAnimation(onDone) {
         }
         phase = 'slide_in';
         slideX = -CW;
-        activeImg = 0;
-        imgP = 0;
+        resetSceneLayer();
       }
     }
 
@@ -809,20 +639,21 @@ function runAnimation(onDone) {
   rafId = requestAnimationFrame(frame);
 }
 
-
 /* ════════════════════════════════════════════════════════════
-   MODULE 13 — EXPORT
-   Captures canvas stream via MediaRecorder → WebM download.
+   MODULE 8 — EXPORT
    ════════════════════════════════════════════════════════════ */
 async function downloadVideo() {
   if (!scenes.length || isPlaying) return;
-  setStatus('⏺ Recording…');
   document.getElementById('saveBtn').disabled = true;
   document.getElementById('playBtn').disabled = true;
+  setStatus('🧠 Preparing sketch…');
+  await prepareAllSketchData();
+
+  setStatus('⏺ Recording…');
   recChunks = [];
 
   const stream = canvas.captureStream(60);
-  const mime   = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']
+  const mime = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']
     .find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
 
   mediaRec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8_000_000 });
@@ -847,15 +678,13 @@ async function downloadVideo() {
   });
 }
 
-
 /* ════════════════════════════════════════════════════════════
-   MODULE 14 — APP STATE & UI
+   MODULE 9 — APP STATE & UI
    ════════════════════════════════════════════════════════════ */
 let scenes    = [];
 let draftChar = null;
 let draftExpl = [];
 
-// ── Image loading helper ──────────────────────────────────
 function loadFile(file) {
   return new Promise(res => {
     const r = new FileReader();
@@ -868,7 +697,6 @@ function loadFile(file) {
   });
 }
 
-// ── Upload handlers ───────────────────────────────────────
 function setCharImage(e) {
   const f = e.target.files[0]; if (!f) return;
   loadFile(f).then(entry => { draftChar = entry; renderCharRow(); updateAddBtn(); });
@@ -885,8 +713,8 @@ function addExplImages(e) {
   e.target.value = '';
 }
 
-function removeChar()     { draftChar = null;        renderCharRow(); updateAddBtn(); }
-function removeExpl(i)    { draftExpl.splice(i, 1);  renderExplRow(); updateAddBtn(); }
+function removeChar()  { draftChar = null;       renderCharRow(); updateAddBtn(); }
+function removeExpl(i) { draftExpl.splice(i, 1);  renderExplRow(); updateAddBtn(); }
 
 function renderCharRow() {
   const row = document.getElementById('charRow');
@@ -930,7 +758,6 @@ function updateAddBtn() {
   );
 }
 
-// ── Scene management ──────────────────────────────────────
 function addScene() {
   if (!draftChar || draftExpl.length < 1) return;
   scenes.push({ charImg: draftChar, explImgs: draftExpl.slice() });
@@ -950,6 +777,7 @@ function addScene() {
 function deleteScene(i) {
   if (!confirm(`Delete scene ${i+1}?`)) return;
   scenes.splice(i, 1);
+  clearSketchCache(); // slot keys are index-based, so drop stale cache
   renderSceneList();
   if (!scenes.length) {
     ['sceneCard','stageCard','ctrlCard'].forEach(id => document.getElementById(id).style.display = 'none');
@@ -985,8 +813,7 @@ function renderSceneList() {
   });
 }
 
-// ── Playback ──────────────────────────────────────────────
-function playVideo() {
+async function playVideo() {
   if (!scenes.length) return;
   if (isPlaying) {
     isPlaying = false;
@@ -995,18 +822,22 @@ function playVideo() {
     setStatus('⏸ Paused');
     return;
   }
+  document.getElementById('playBtn').disabled = true;
+  setStatus('🧠 Preparing sketch…');
+  await prepareAllSketchData();
+  document.getElementById('playBtn').disabled = false;
+
   isPlaying = true;
   document.getElementById('playBtn').textContent = '⏸ Pause';
   setStatus('▶ Playing…');
   runAnimation(null);
 }
 
-// ── Reset ─────────────────────────────────────────────────
 function resetAll() {
   if (!confirm('Reset everything?')) return;
   isPlaying = false;
   cancelAnimationFrame(rafId);
-  scenes = []; draftChar = null; draftExpl = []; clearSlotCache();
+  scenes = []; draftChar = null; draftExpl = []; clearSketchCache();
   renderCharRow(); renderExplRow(); renderSceneList();
   document.getElementById('sceneNumLabel').textContent = '1';
   ['sceneCard','stageCard','ctrlCard'].forEach(id => document.getElementById(id).style.display = 'none');
@@ -1017,45 +848,33 @@ function resetAll() {
   updateAddBtn();
 }
 
-// ── Settings ──────────────────────────────────────────────
-const DEFAULTS = {
-  sThick:'2.2', sPressure:'0.45', sWobble:'0.6',
-  sSpeed:'3.5', sPause:'0.02', sHold:'1.2',
-  sTexture:'0.35'
-};
-const CFG_MAP = {
-  sThick:'strokeThick', sPressure:'pressureVar', sWobble:'wobble',
-  sSpeed:'secPerImage', sPause:'pauseBetween', sHold:'holdSec',
-  sTexture:'pencilTexture'
-};
+/* ── Settings ──────────────────────────────────────────────── */
+const DEFAULTS = { sThick: '2', sDarkness: '150', sSpeed: '5', sHold: '1.2' };
+const CFG_MAP  = { sThick: 'thickness', sDarkness: 'darkness', sSpeed: 'secPerImage', sHold: 'holdSec' };
 
 function syncSetting(el, valId) {
   document.getElementById(valId).textContent = el.value;
   CFG[CFG_MAP[el.id]] = parseFloat(el.value);
-  // Clear slot canvas cache when quality settings change
-  if (el.id === 'sEdge' || el.id === 'sTexture') clearSlotCache();
+  // Darkness threshold changes which pixels count as "dark" — rebuild sketch data.
+  if (el.id === 'sDarkness') clearSketchCache();
 }
 function resetSettings() {
   Object.entries(DEFAULTS).forEach(([id, val]) => {
     const el = document.getElementById(id);
     el.value = val;
-    const valId = id + 'Val';
-    document.getElementById(valId).textContent = val;
+    document.getElementById(id + 'Val').textContent = val;
     CFG[CFG_MAP[id]] = parseFloat(val);
   });
+  clearSketchCache();
 }
 function openSettings()  { document.getElementById('settingsModal').style.display = 'flex'; }
 function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
 function openCanva()     { document.getElementById('canvaModal').style.display = 'flex'; }
 function closeCanva()    { document.getElementById('canvaModal').style.display = 'none'; }
 
-// ── Progress display ──────────────────────────────────────
-
-
-// ── Status line ───────────────────────────────────────────
 function setStatus(msg) { document.getElementById('status').textContent = msg; }
 
-// ── Boot ──────────────────────────────────────────────────
+/* ── Boot ──────────────────────────────────────────────────── */
 renderCharRow();
 renderExplRow();
 updateAddBtn();
@@ -1063,5 +882,3 @@ drawBackground();
 </script>
 </body>
 </html>
-
-   
