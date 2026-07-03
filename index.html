@@ -150,7 +150,7 @@ input[type=range]::-webkit-slider-thumb {
 <body>
 
 <div id="topbar">
-  <h1>🎬 Explainer Video Maker</h1>
+  <h1>🎬 Explainer Video Maker <span style="color:#3ddc97;font-size:10px;">v3</span></h1>
   <div style="display:flex;gap:6px;align-items:center">
     <span class="tag">Free</span>
     <button id="settingsBtn" onclick="openSettings()">⚙ Settings</button>
@@ -277,10 +277,10 @@ const CFG = {
   holdSec:     1.2,   // hold time after a scene finishes sketching
 
   textZoneH:   180,   // blank px at top-left for Canva text
-  captionGap:  90,    // blank px reserved below the character for captions — pushes character up
+  captionGap:  170,   // blank px reserved below the character for captions — pushes character up
   zonePad:     22,     // inner padding in each zone
   gridGutterX: 16,     // horizontal px between grid columns
-  gridGutterY: 6,      // vertical px between grid rows — kept tight so top/bottom rows sit close
+  gridGutterY: 0,      // vertical px between grid rows — rows sit flush against each other
 
   handSize:      180,
   handOffsetXPct: -10,
